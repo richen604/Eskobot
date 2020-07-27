@@ -1,0 +1,2 @@
+# Eskobot
+Discord Moderation Bot
