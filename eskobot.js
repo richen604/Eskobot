@@ -3,47 +3,31 @@
 const fs = require('fs');
 const Discord = require('discord.js');
 const { prefix, token } = require('./config.json');
+const Sequelize = require('sequelize');
 
 /*
  DISCORD.JS VERSION 12 CODE
 */
-// t est
+
+// TO-DOS
 
 
-const client = new Discord.Client();
-// Grabs commands folder files to import into an array
-client.commands = new Discord.Collection();
+// TODO: USER HISTORY: Function to send (reason) to user database
+/* Using Sequentialize and SQLite3
+visit https://discordjs.guide/sequelize/#alpha-connection-information
+*/
 
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+// TODO: LOGGING Mod history in a channel
 
-for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
-}
+// TODO: LOGGING: Logging for edited and deleted messages
 
-const cooldowns = new Discord.Collection();
-
-
-client.on('ready', () => {
-    console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
-    client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
-});
-
-client.on('guildCreate', guild => {
-    console.log(`New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
-    client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
-});
-
-client.on('guildDelete', guild => {
-    console.log(`I have been removed from: ${guild.name} (id: ${guild.id})`);
-    client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
-});
-
-
-// TODO: USER HISTORY: Function to send (reason) to json user database
 // TODO: ERROR: change server messages for bot to dm for errors
+
 // TODO: HELP: help should be dm as well
-// TODO: Module check for staff rather than function feature
+
+// TODO: REFACTORING: Module check for staff rather than function feature
+
+// TODO: TICKETS: Modmail Bot
 /* TODO: Modmail bot:
 / Ticket Channel Category
 / bot responds to dms with a placeholder
@@ -54,6 +38,75 @@ client.on('guildDelete', guild => {
 - !reply [reply] sends a response to the user => so staff can discuss the ticket
 - anti spam on ticket
 - anti group chat for bot */
+
+// TODO: BAN APPEAL: Ban Appeals google docs
+
+// TODO: LOGGING: Logs vc join and leave
+
+
+const client = new Discord.Client();
+
+// sequelize initialization
+
+const sequelize = new Sequelize('database', 'user', 'password', {
+    host: 'localhost',
+    dialect: 'sqlite',
+    logging: false,
+    // SQLite only
+    storage: 'database.sqlite',
+});
+
+// Set up table and tags (TESTING)
+
+const Tags = sequelize.define('tags', {
+    name: {
+        type: Sequelize.STRING,
+        unique: true,
+    },
+    description: Sequelize.TEXT,
+    username: Sequelize.STRING,
+    usage_count: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+    },
+});
+
+
+
+
+// Grabs commands folder files to import into an array
+client.commands = new Discord.Collection();
+
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
+}
+
+// Cooldowns initialization for later
+const cooldowns = new Discord.Collection();
+
+
+// Bot start
+client.on('ready', () => {
+    console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
+    client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
+});
+
+// sync Sequelize tags table
+Tags.sync();
+
+client.on('guildCreate', guild => {
+    console.log(`New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
+    client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
+});
+
+client.on('guildDelete', guild => {
+    console.log(`I have been removed from: ${guild.name} (id: ${guild.id})`);
+    client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
+});
 
 
 // CLIENT ON MESSAGE
