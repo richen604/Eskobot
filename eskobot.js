@@ -59,17 +59,11 @@ const sequelize = new Sequelize('database', 'user', 'password', {
 // Set up table and tags (TESTING)
 
 const Tags = sequelize.define('tags', {
-    name: {
-        type: Sequelize.STRING,
-        unique: true,
-    },
-    description: Sequelize.TEXT,
+    userid: Sequelize.INTEGER,
     username: Sequelize.STRING,
-    usage_count: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
-        allowNull: false,
-    },
+    punishment: Sequelize.STRING,
+    reason: Sequelize.STRING,
+    punishmentTime: Sequelize.INTEGER,
 });
 
 
@@ -171,7 +165,7 @@ client.on('message', message => {
 
 
     try {
-        command.execute(client, message, args);
+        command.execute(client, message, args, Tags);
     } catch (error) {
         console.error(error);
         message.reply(`Couldn't execute that command because of \`${error}\``);
