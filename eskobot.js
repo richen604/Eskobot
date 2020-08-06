@@ -4,45 +4,11 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const { prefix, token } = require('./config.json');
 const Sequelize = require('sequelize');
+const { staffRoles } = require('./commands/kick');
 
 /*
  DISCORD.JS VERSION 12 CODE
 */
-
-// TO-DOS
-
-
-// TODO: USER HISTORY: Function to send (reason) to user database
-/* Using Sequentialize and SQLite3
-visit https://discordjs.guide/sequelize/#alpha-connection-information
-*/
-
-// TODO: LOGGING Mod history in a channel
-
-// TODO: LOGGING: Logging for edited and deleted messages
-
-// TODO: ERROR: change server messages for bot to dm for errors
-
-// TODO: HELP: help should be dm as well
-
-// TODO: REFACTORING: Module check for staff rather than function feature
-
-// TODO: TICKETS: Modmail Bot
-/* TODO: Modmail bot:
-/ Ticket Channel Category
-/ bot responds to dms with a placeholder
-- User messages bot => bot creates channel in ticket channel
-- Staff are pinged on ticket open
-- !close {reason} closes the ticket
-- tickets have an embed for a todo script for handling
-- !reply [reply] sends a response to the user => so staff can discuss the ticket
-- anti spam on ticket
-- anti group chat for bot */
-
-// TODO: BAN APPEAL: Ban Appeals google docs
-
-// TODO: LOGGING: Logs vc join and leave
-
 
 const client = new Discord.Client();
 
@@ -121,12 +87,31 @@ client.on('message', message => {
 
     // Server only command check
     if (!command && message.channel.type !== 'text') {
+        // Insert Modmail logic here
         message.reply('test');
     } else if (message.content.startsWith(prefix) && command.guildOnly && message.channel.type !== 'text') {
         return message.reply('I can\'t execute that command inside DMs!');
     }
 
-    if (!command) return;
+    if (!command && !message.content.startsWith(prefix)) return;
+
+    //Staff Check
+    /*
+    if staffRole exists
+        if doesnt have role
+        if has role
+    else if staffRole doesnt exist
+
+
+    */
+    if (!command.staffRoles){
+    } else if (command.staffRoles){
+        if (!message.member.roles.cache.some(r => command.staffRoles.includes(r.name))) {
+            return message.reply('Sorry, you don\'t have permissions to use this!');
+        }
+    }
+
+    // TODO: remove ability for regular users to see staff commands
 
     // Arguments check => args-info.js
     if (command.args && !args.length) {

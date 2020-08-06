@@ -6,9 +6,8 @@ module.exports = {
     args: 'true',
     usage: ': | <null> | <time> <reason> | <time>',
     guildOnly: 'true',
+    staffRoles: ['Exec.Director', 'Board Member', 'Staff', 'Comfy'],
     execute(client, message, args) {
-        if (!message.member.roles.cache.some(r => ['Exec. Director', 'Board Member', 'Staff', 'Comfy'].includes(r.name))) { return message.reply('Sorry, you don\'t have permissions to use this!'); }
-
         const member = message.mentions.members.first() || client.users.resolve(args[0]);
         if (!member) { return message.reply('Please mention a valid member of this server'); }
 

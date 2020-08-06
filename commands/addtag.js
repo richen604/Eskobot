@@ -5,11 +5,11 @@ module.exports = {
     guildOnly: 'true',
     args: 'true',
     usage: '*Testing* | <time> <reason> |',
+    staffRoles: ['Exec.Director', '+'],
     execute(client, message, args, Tags) {
         try {
             async function f() {
                 const tag = await Tags.create({
-                    // FIXME: dummy values for testing
                     userid: message.author.id,
                     username: message.author.username,
                     punishment: args.toString(),

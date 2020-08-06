@@ -2,6 +2,7 @@ module.exports = {
     name: "showtags",
     description: "shows all tags in database",
     guildOnly: "true",
+    staffRoles: ['Exec.Director', '+'],
     execute(client, message, args, Tags) {
             // equivalent to: SELECT name FROM tags;
         async function f() {
