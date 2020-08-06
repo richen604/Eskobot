@@ -16,7 +16,7 @@ module.exports = {
 			const tagString = tagList.map(t => t.userid).join(', ') || 'No tags set.';
 
             return message.channel.send(`List of tags: ${tagString}`);
-    }
+    }   
     f()
 
 }}
