@@ -6,7 +6,6 @@ module.exports = {
     description: 'Removes all messages from all users in the channel, up to 100.',
     guildOnly: 'true',
     execute(client, message, args) {
-
         if (!message.member.roles.cache.some(r => ['Exec. Director', 'Board Member', 'Comfy'].includes(r.name))) { return message.reply('Sorry, you don\'t have permissions to use this!'); }
         // get the delete count, as an actual number.
         const deleteCount = parseInt(args[0], 10);

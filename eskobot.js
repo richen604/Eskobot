@@ -59,19 +59,12 @@ const sequelize = new Sequelize('database', 'user', 'password', {
 // Set up table and tags (TESTING)
 
 const Tags = sequelize.define('tags', {
-    name: {
-        type: Sequelize.STRING,
-        unique: true,
-    },
-    description: Sequelize.TEXT,
+    userid: Sequelize.INTEGER,
     username: Sequelize.STRING,
-    usage_count: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
-        allowNull: false,
-    },
+    punishment: Sequelize.STRING,
+    reason: Sequelize.STRING,
+    punishmentTime: Sequelize.INTEGER,
 });
-
 
 
 
@@ -121,7 +114,7 @@ client.on('message', message => {
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
 
-    // Cooldown check
+    // command init
     const command = client.commands.get(commandName) ||
         client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
@@ -169,13 +162,13 @@ client.on('message', message => {
     timestamps.set(message.author.id, now);
     setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
-
     try {
-        command.execute(client, message, args);
+        command.execute(client, message, args, Tags);
     } catch (error) {
         console.error(error);
         message.reply(`Couldn't execute that command because of \`${error}\``);
     }
+
 });
 
 

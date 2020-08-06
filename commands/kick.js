@@ -3,7 +3,7 @@ module.exports = {
     aliases: ['boot'],
     description: 'Boots a user out of the server',
     guildOnly: 'true',
-    execute(client, message, args) {
+    execute(client, message, args)  {
         // check for roles
         if (!message.member.roles.cache.some(r => ['Exec. Director', 'Board Member', 'Staff', 'Comfy'].includes(r.name))) { return message.reply('Sorry, you don\'t have permissions to use this!'); }
 
