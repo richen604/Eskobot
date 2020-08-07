@@ -24,12 +24,18 @@ const sequelize = new Sequelize('database', 'user', 'password', {
 
 // Set up table and tags (TESTING)
 
-const Tags = sequelize.define('tags', {
+const punishmentLog = sequelize.define('punishmentLog', {
     userid: Sequelize.INTEGER,
     username: Sequelize.STRING,
     punishment: Sequelize.STRING,
     reason: Sequelize.STRING,
     punishmentTime: Sequelize.INTEGER,
+    staffName: Sequelize.STRING,
+    count: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+    },
 });
 
 
@@ -55,7 +61,7 @@ client.on('ready', () => {
 });
 
 // sync Sequelize tags table
-Tags.sync();
+punishmentLog.sync();
 
 client.on('guildCreate', guild => {
     console.log(`New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
@@ -89,6 +95,7 @@ client.on('message', message => {
     if (!command && message.channel.type !== 'text') {
         // Insert Modmail logic here
         message.reply('test');
+    } else if (!command) { return;
     } else if (message.content.startsWith(prefix) && command.guildOnly && message.channel.type !== 'text') {
         return message.reply('I can\'t execute that command inside DMs!');
     }
@@ -148,7 +155,7 @@ client.on('message', message => {
     setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
     try {
-        command.execute(client, message, args, Tags);
+        command.execute(client, message, args, punishmentLog);
     } catch (error) {
         console.error(error);
         message.reply(`Couldn't execute that command because of \`${error}\``);

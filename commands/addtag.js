@@ -6,25 +6,26 @@ module.exports = {
     args: 'true',
     usage: '*Testing* | <time> <reason> |',
     staffRoles: ['Exec.Director', '+'],
-    execute(client, message, args, Tags) {
+    execute(client, message, args, punishmentLog) {
         try {
             async function f() {
-                const tag = await Tags.create({
+                const log = await punishmentLog.create({
                     userid: message.author.id,
                     username: message.author.username,
-                    punishment: args.toString(),
-                        
+                    punishment: args.join(' '),
+                    reason: null,
+                    staffName: message.author.id,
                 });
-                return message.reply(`Tag ${tag.username} added.`);
+                return message.reply(`Log ${log.username} added.`);
             }
             f()
         }
         catch (e) {
             if (e.name === 'SequelizeUniqueConstraintError') {
-                return message.reply('That tag already exists.');
+                return message.reply('That log already exists.');
             }
             console.log(e)
-             return message.reply("Something went wrong with adding a tag.");
+             return message.reply("Something went wrong with adding a log.");
         }
     }
 }

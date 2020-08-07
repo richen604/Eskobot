@@ -3,7 +3,7 @@ module.exports = {
     description: "shows all tags in database",
     guildOnly: "true",
     staffRoles: ['Exec.Director', '+'],
-    execute(client, message, args, Tags) {
+    execute(client, message, args, punishmentLog) {
             // equivalent to: SELECT name FROM tags;
         async function f() {
             
@@ -13,8 +13,8 @@ module.exports = {
             //const tagString = JSON.stringify(tagList) || 'No tags set.';
 
 
-            const tagList = await Tags.findAll({ attributes: ['userid'] });
-			const tagString = tagList.map(t => t.userid).join(', ') || 'No tags set.';
+            const tagList = await punishmentLog.findAll();
+			const tagString = JSON.stringify(tagList) || 'No tags set.';
 
             return message.channel.send(`List of tags: ${tagString}`);
     }   
