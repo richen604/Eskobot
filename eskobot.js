@@ -118,13 +118,11 @@ client.on('message', message => {
         }
     }
 
-    // TODO: remove ability for regular users to see staff commands
-
-    // Arguments check => args-info.js
+    // Arguments and staff check => args-info.js
     if (command.args && !args.length) {
         let reply = `You didn't provide any arguments, ${message.author}!`;
 
-        if (command.usage) {
+        if (command.usage && command.staffRoles) {
             reply += `\nThe proper usage would be: \`${prefix}${command.name} ${command.usage}\``;
         }
 

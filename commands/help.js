@@ -31,11 +31,12 @@ module.exports = {
 
         if (!command) {
             return message.reply('That\'s not a valid command!');
+        } else if (command.staffRoles) {
+            return message.reply('You don\'t have permission to use help for this command!');
         }
 
         data.push(`**Name** ${command.name}`);
 
-        // TODO: remove ability for regular users to see staff commands
         if (command.aliases) data.push(`**Aliases:** ${command.aliases.join(', ')}`);
         if (command.description) data.push(`**Description:** ${command.description}`);
         if (command.usage) data.push(`**Usage:** ${prefix}${command.name} ${command.usage}`);

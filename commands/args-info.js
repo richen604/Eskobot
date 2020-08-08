@@ -1,7 +1,8 @@
 module.exports = {
     name: 'args-info',
-    description: 'Information about the arugments provided',
+    description: 'Information about the arguments provided',
     guildOnly: 'true',
+    staffRoles: ['Exec.Director', '+'],
     execute(client, message, args) {
         if (args[0] === 'foo') {
             return message.channel.send('bar');

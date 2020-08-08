@@ -4,15 +4,15 @@ visit https://discordjs.guide/sequelize/#alpha-connection-information
 
 + Set up database for userids, usernames, punishments, punishementtime
 + set up placeholder commands to show and add data to tables
-
-- finish the guide for the rest of the commands
-
 + change tags table to punishmentLog
 + add staffname column to punishmentLog
++ change showtags name and function to display specific username/id history rather than all
++ show content in an embed
 
-- change showtags name and function to display specific username/id history rather than all
+
+- update embed to look better 
 - change addtag to take args of the columns
-
+- finish the guide for the rest of the commands
 // TOD: DATABASE: refresh usernames in database every week(?) using user.fetch()
 
 // DONE: REFACTORING: Module check for staff rather than function feature
