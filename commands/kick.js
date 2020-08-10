@@ -5,6 +5,7 @@ module.exports = {
     description: 'Boots a user out of the server',
     guildOnly: 'true',
     staffRoles: ['Exec.Director', 'Board Member', 'Staff', 'Comfy'],
+    log: 'true',
     execute(client, message, args)  {
         // user mention check
         const member = message.mentions.members.first() || client.users.resolve(args[0]);

@@ -4,7 +4,6 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const { prefix, token } = require('./config.json');
 const Sequelize = require('sequelize');
-const { staffRoles } = require('./commands/kick');
 
 /*
  DISCORD.JS VERSION 12 CODE
@@ -102,15 +101,6 @@ client.on('message', message => {
 
     if (!command && !message.content.startsWith(prefix)) return;
 
-    //Staff Check
-    /*
-    if staffRole exists
-        if doesnt have role
-        if has role
-    else if staffRole doesnt exist
-
-
-    */
     if (!command.staffRoles){
     } else if (command.staffRoles){
         if (!message.member.roles.cache.some(r => command.staffRoles.includes(r.name))) {
@@ -157,6 +147,29 @@ client.on('message', message => {
     } catch (error) {
         console.error(error);
         message.reply(`Couldn't execute that command because of \`${error}\``);
+    }
+
+    if (command.log) {
+        try {
+            async function f() {
+                const log = await punishmentLog.create({
+                    userid: message.author.id,
+                    username: args[0],
+                    punishment: command.name,
+                    reason: args.slice(1).join(' '),
+                    staffName: message.author.id,
+                });
+                return message.reply(`Log ${log.username} added.`);
+            }
+            f()
+        }
+        catch (e) {
+            if (e.name === 'SequelizeUniqueConstraintError') {
+                return message.reply('That log already exists.');
+            }
+            console.log(e)
+             return message.reply("Something went wrong with adding a log.");
+        }
     }
 
 });

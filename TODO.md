@@ -13,6 +13,7 @@ visit https://discordjs.guide/sequelize/#alpha-connection-information
 - update embed to look better 
 - change addtag to take args of the columns
 - finish the guide for the rest of the commands
+
 // TOD: DATABASE: refresh usernames in database every week(?) using user.fetch()
 
 // DONE: REFACTORING: Module check for staff rather than function feature
