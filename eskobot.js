@@ -148,7 +148,7 @@ client.on('message', message => {
         console.error(error);
         message.reply(`Couldn't execute that command because of \`${error}\``);
     }
-
+    //FIXME log continues even if error
     if (command.log) {
         try {
             async function f() {
@@ -157,7 +157,7 @@ client.on('message', message => {
                     username: args[0],
                     punishment: command.name,
                     reason: args.slice(1).join(' '),
-                    staffName: message.author.id,
+                    staffName: `<@${message.author.id}>`,
                 });
                 return message.reply(`Log ${log.username} added.`);
             }

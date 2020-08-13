@@ -19,10 +19,14 @@ module.exports = {
 
         const time = args[1];
 
-        if (!time) {
+        if (!args[1]) {
             member.roles.add(muterole.id);
-            message.channel.send(`${member} has now been muted for ${reason}`);
-            return;
+            return message.channel.send(`${member} has now been muted for ${reason}`);
+        } else if (typeof args[1] === 'string') {
+            //BUG reason becomes <time> if thats the only argument as time is a string apparently
+            let reason = args.slice(1).join(' ');
+            member.roles.add(muterole.id);
+            return message.channel.send(`${member} has now been muted for ${reason}`);
         }
 
         member.roles.add(muterole.id);

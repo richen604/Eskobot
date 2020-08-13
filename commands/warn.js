@@ -1,5 +1,3 @@
-const log  = require('../events/logpunishment.js');
-const logpunishment = require('../events/logpunishment.js');
 
 
 module.exports = {

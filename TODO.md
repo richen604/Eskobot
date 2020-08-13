@@ -8,29 +8,24 @@ visit https://discordjs.guide/sequelize/#alpha-connection-information
 + add staffname column to punishmentLog
 + change showtags name and function to display specific username/id history rather than all
 + show content in an embed
-
-
-- update embed to look better 
-- change addtag to take args of the columns
++ update embed to look better
 - finish the guide for the rest of the commands
+(optional)
+- change addtag to take args of the columns
 
-// TOD: DATABASE: refresh usernames in database every week(?) using user.fetch()
-
-// DONE: REFACTORING: Module check for staff rather than function feature
-
-// TOD LOGGING Mod history in a channel
+// TODO LOGGING Mod history in a channel
 - connect punishmentsLog to a channel in eskobot.js
-how do i log through new data?
+- when a punishment is sent, send a message to staffLog channel using existing methods
 -
 
-// TOD LOGGING: Logging for edited and deleted messages
+// TODO LOGGING: Logging for edited and deleted messages
 
-// TOD ERROR: change server messages for bot to dm for errors
+// TODO ERROR: change server messages for bot to dm for errors
 
-// TOD HELP: help should be dm as well
+// TODO HELP: help should be dm as well
 
-// TOD TICKETS: Modmail Bot
-/* TOD Modmail bot:
+// TODO TICKETS: Modmail Bot
+/* TODO Modmail bot:
 + Ticket Channel Category
 + bot responds to dms with a placeholder
 - User messages bot => bot creates channel in ticket channel
@@ -41,9 +36,22 @@ how do i log through new data?
 - anti spam on ticket
 - anti group chat for bot */
 
-// TOD BAN APPEAL: Ban Appeals google docs
+// TODO BAN APPEAL: Ban Appeals google docs
 
-// TOD LOGGING: Logs vc join and leave
+// TODO LOGGING: Logs vc join and leave
 
-// TOD ROLES: emote role maker
-// TOD ROLES: emote voting function
+// TODO ROLES: emote role setter
+
+// TODO ROLES: emote voting function
+
+// TODO ROLES: !populate command => takes an array or set of links and posts them to a channel, usage: <channel> <array/set> (JSON FILE?)
+
+TODO EVENTS use collectors in guide to set up event starting and ending
+
+TODO FUN use canvas to set up a welcome image for users
+
+TODO !nick command to change nickname
+
+TODO spam check similar to LFG
+
+// DONE: REFACTORING: Module check for staff rather than function feature
