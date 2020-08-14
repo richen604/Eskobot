@@ -4,7 +4,7 @@ module.exports = {
     name: "warn",
     description: 'warns the player, giving a reason for the warning',
     usage: '!warn <reason>',
-    staffRoles: ['Exec.Director', 'Board Member', 'Staff', 'Comfy'],
+    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy'],
     log: 'true',
     execute(client, message, args, punishmentLog) {
         const member = message.mentions.members.first() || client.users.resolve(args[0]);

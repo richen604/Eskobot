@@ -148,6 +148,8 @@ client.on('message', message => {
         console.error(error);
         message.reply(`Couldn't execute that command because of \`${error}\``);
     }
+
+    // logs punishment if log is true in module
     //FIXME log continues even if error
     if (command.log) {
         try {
@@ -159,7 +161,12 @@ client.on('message', message => {
                     reason: args.slice(1).join(' '),
                     staffName: `<@${message.author.id}>`,
                 });
+                const channel = client.channels.cache.get('743831588328046623')
+                if (channel) {
+                    channel.send(`id\: ${log.id} \| user\: ${log.username} \| ${log.punishment} for ${log.reason} | Done by Staff: ${log.staffName}`)
+                }
                 return message.reply(`Log ${log.username} added.`);
+                
             }
             f()
         }

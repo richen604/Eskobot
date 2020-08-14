@@ -5,7 +5,7 @@ module.exports = {
     guildOnly: 'true',
     args: 'true',
     usage: '*Testing* | <time> <reason> |',
-    staffRoles: ['Exec.Director', '+'],
+    staffRoles: ['Exec. Director', '+'],
     execute(client, message, args, punishmentLog) {
         try {
             async function f() {

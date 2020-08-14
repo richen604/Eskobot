@@ -13,7 +13,9 @@ visit https://discordjs.guide/sequelize/#alpha-connection-information
 (optional)
 - change addtag to take args of the columns
 
-// TODO LOGGING Mod history in a channel
+// TODO USER HISTORY: separate log by servers
+
+// DONE LOGGING Mod history in a channel
 - connect punishmentsLog to a channel in eskobot.js
 - when a punishment is sent, send a message to staffLog channel using existing methods
 -
