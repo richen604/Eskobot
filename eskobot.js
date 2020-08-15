@@ -2,7 +2,7 @@
 // Load up the discord.js library
 const fs = require('fs');
 const Discord = require('discord.js');
-const { prefix, token } = require('./config.json');
+const { prefix, token, staffLog } = require('./config.json');
 const Sequelize = require('sequelize');
 
 /*
@@ -161,7 +161,8 @@ client.on('message', message => {
                     reason: args.slice(1).join(' '),
                     staffName: `<@${message.author.id}>`,
                 });
-                const channel = client.channels.cache.get('743831588328046623')
+                // sends to channel in MOOC server for staff log
+                const channel = client.channels.cache.get(staffLog)
                 if (channel) {
                     channel.send(`id\: ${log.id} \| user\: ${log.username} \| ${log.punishment} for ${log.reason} | Done by Staff: ${log.staffName}`)
                 }

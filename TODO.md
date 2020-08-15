@@ -1,4 +1,26 @@
-// TODO: USER HISTORY: Function to send (reason) to user database
+NEXT COMMIT
+- added staff channel id to config.json
+- installed a spam package from npm to do a similar function, temporary
+- created minimal populate.js command
+
+
+
+
+TODO spam check similar to LFG
++ installed a spam package from npm to do a similar function, temporary
+
+TODO ROLES: emote role setter
+
+TODO CONTENT: emote voting function
+
+DONE CONTENT: !populate command => takes an array or set of links and posts them to a channel, usage: <channel> <array/set> (JSON FILE?)
++ created a barebones channel send function
+Getting getting website content requires webscraping
+
+
+TODO FUN use canvas to set up a welcome image for users
+
+TODO: USER HISTORY: Function to send (reason) to user database
 Using Sequelize and SQLite3
 visit https://discordjs.guide/sequelize/#alpha-connection-information
 
@@ -14,6 +36,8 @@ visit https://discordjs.guide/sequelize/#alpha-connection-information
 - change addtag to take args of the columns
 
 // TODO USER HISTORY: separate log by servers
+- add guild id to database
+- include check for guild database before showing log in the forEach() statement
 
 // DONE LOGGING Mod history in a channel
 - connect punishmentsLog to a channel in eskobot.js
@@ -42,18 +66,10 @@ visit https://discordjs.guide/sequelize/#alpha-connection-information
 
 // TODO LOGGING: Logs vc join and leave
 
-// TODO ROLES: emote role setter
 
-// TODO ROLES: emote voting function
-
-// TODO ROLES: !populate command => takes an array or set of links and posts them to a channel, usage: <channel> <array/set> (JSON FILE?)
 
 TODO EVENTS use collectors in guide to set up event starting and ending
 
-TODO FUN use canvas to set up a welcome image for users
-
 TODO !nick command to change nickname
-
-TODO spam check similar to LFG
 
 // DONE: REFACTORING: Module check for staff rather than function feature
