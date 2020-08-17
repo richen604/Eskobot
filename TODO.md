@@ -1,12 +1,10 @@
 NEXT COMMIT
--added reaction listening logic to some channels
--added message delete listener with minimal logic
--added message update(edit) listener with minimal logic
+- initialized antispam
 
 
 TODO spam check similar to LFG
 + installed a spam package from npm to do a similar function, temporary
-- initialize antispam module in eskobot.js
++ initialize antispam module in eskobot.js
 
 TODO ROLES: emote role setter
 *expected function*
