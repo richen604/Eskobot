@@ -9,7 +9,7 @@ const Sequelize = require('sequelize');
  DISCORD.JS VERSION 12 CODE
 */
 
-const client = new Discord.Client();
+const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
 // sequelize initialization
 
@@ -80,6 +80,7 @@ client.on('message', message => {
     // Message event, constant
     // ignore bots/self
     if (message.author.bot) return;
+
 
     // split command and args, args being sliced array
     const args = message.content.slice(prefix.length).trim().split(/ +/);
@@ -179,6 +180,62 @@ client.on('message', message => {
              return message.reply("Something went wrong with adding a log.");
         }
     }
+
+});
+
+// Client Reaction listener
+
+client.on('messageReactionAdd', async (reaction, user) => {
+
+    // TODO put these in config.json
+    const lfgVote = '735951916621627472'
+    const contentVote = '735951123898302614'
+    const getRoles = '744536926757060683'
+    const rules = '735537345981579457'
+
+    // only listen for reactions in channels we want to handle reactions
+    if (reaction.message.channel.id !== (lfgVote || contentVote || getRoles || rules)) return;
+	// if partial check
+	if (reaction.partial) {
+		// try catch for fetching
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.log('Something went wrong when fetching the message: ', error);
+			return;
+		}
+	}
+    
+
+    // do something here
+
+    
+}); 
+
+// Client message delete logger
+
+client.on('messageDelete', message => {
+    const deleteChannel = client.channels.cache.get('744966412262703265')
+    // ignore direct messages
+    if (!message.guild) return;
+    // FIXME message returns null when deleted before bot restart
+    if (oldMessage === null) return deleteChannel.send(`Probably tried to delete a message before bot restart, won't log`)
+    if (message.author.bot) return;
+
+	deleteChannel.send(`A message by ${message.author} was deleted, but we don't know by who: \n\`${message.content}\``);
+});
+
+// Client message edit logger
+
+client.on('messageUpdate', (oldMessage, newMessage) => {
+    // FIXME oldMessage / newMessage returns null when editing before bot restart
+    if (!oldMessage.guild) return;
+    if (oldMessage === null) return deleteChannel.send(`Probably tried to edit a message before bot restart, won't log`)
+    if (oldMessage.author.bot) return;
+
+    const editChannel = client.channels.cache.get('744966289310744668')
+
+    editChannel.send(`${oldMessage.author} edited a message: \nOld Message\: \`${oldMessage.content}\` \nNew Message\: \`${newMessage.content}\``)
 
 });
 

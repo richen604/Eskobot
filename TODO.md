@@ -1,17 +1,29 @@
 NEXT COMMIT
-- added staff channel id to config.json
-- installed a spam package from npm to do a similar function, temporary
-- created minimal populate.js command
-
-
+-added reaction listening logic to some channels
+-added message delete listener with minimal logic
+-added message update(edit) listener with minimal logic
 
 
 TODO spam check similar to LFG
 + installed a spam package from npm to do a similar function, temporary
+- initialize antispam module in eskobot.js
 
 TODO ROLES: emote role setter
+*expected function*
+user clicks on emote in message and gets the role assigned
+*possible way to get there*
+- have an event handler for reacting on specific messages and a command to add the message id to the handler?
+- could also have the ids manually pasted in config.json in an array
 
 TODO CONTENT: emote voting function
+*expected function*
+reacts for specific messages vote for the content to be posted in another channel
+*possible ways to get there*
+- user or staff !startVote command? takes link as arg and starts an event handler?
+- have the amount of votes required in a const, maybe editable by the command by staff?
+
+TODO INCENTIVES 10 invites gets you nitro
+
 
 DONE CONTENT: !populate command => takes an array or set of links and posts them to a channel, usage: <channel> <array/set> (JSON FILE?)
 + created a barebones channel send function
@@ -45,6 +57,7 @@ visit https://discordjs.guide/sequelize/#alpha-connection-information
 -
 
 // TODO LOGGING: Logging for edited and deleted messages
+- post it to a channel?
 
 // TODO ERROR: change server messages for bot to dm for errors
 
