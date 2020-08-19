@@ -1,5 +1,4 @@
 NEXT COMMIT
-- initialized antispam
 
 
 TODO spam check similar to LFG

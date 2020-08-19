@@ -216,6 +216,45 @@ client.on('messageReactionAdd', async (reaction, user) => {
     const contentVote = '735951123898302614'
     const getRoles = '744536926757060683'
     const rules = '735537345981579457'
+    
+    // only listen for reactions in channels we want to handle reactions
+    if (!reaction.message.channel.id === (lfgVote || contentVote || getRoles || rules)) return;
+    // if partial check
+	if (reaction.partial) {
+		// try catch for fetching
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.log('Something went wrong when fetching the message: ', error);
+			return;
+		}
+	}
+    
+    // TODO Add Rules / Welcome Function
+    // Rules / Welcome Function
+    if (reaction.message.id === '745376506364297316' && reaction.emoji.name === '📚'); {
+        // Find role Pupil and add it to the user
+        const role = reaction.message.guild.roles.cache.find(role => role.name === 'Pupil');
+        const member = reaction.message.guild.members.cache.find(u => u.user === user);
+        member.roles.add(role);
+    }
+
+    // TODO Add Roles Add Function
+    // Roles Add Function
+
+    // TODO Add Vote Add Function
+    // Vote Add Function
+
+    
+}); 
+
+client.on('messageReactionRemove', async (reaction, user) => {
+
+    // TODO put these in config.json
+    const lfgVote = '735951916621627472'
+    const contentVote = '735951123898302614'
+    const getRoles = '744536926757060683'
+    const rules = '735537345981579457'
 
     // only listen for reactions in channels we want to handle reactions
     if (reaction.message.channel.id !== (lfgVote || contentVote || getRoles || rules)) return;
@@ -230,16 +269,33 @@ client.on('messageReactionAdd', async (reaction, user) => {
 		}
 	}
     
+    // TODO Add Roles Removal Function
+    // Roles Removal Function
 
-    // do something here
+    // TODO Add Vote Removal Function
+    // Vote Removal Function
 
     
 }); 
 
+
 // Client message delete logger
 
-client.on('messageDelete', message => {
+client.on('messageDelete', async message => {
+
+    if (message.partial) {
+		// try catch for fetching
+		try {
+			await message.fetch();
+		} catch (error) {
+			console.log('Something went wrong when fetching the message: ', error);
+			return;
+		}
+	}
+
+
     const deleteChannel = client.channels.cache.get('744966412262703265')
+    // TODO add check for guild / change const for edit channel
     // ignore direct messages
     if (!message.guild) return;
     // FIXME message returns null when deleted before bot restart
@@ -251,8 +307,21 @@ client.on('messageDelete', message => {
 
 // Client message edit logger
 
-client.on('messageUpdate', (oldMessage, newMessage) => {
+client.on('messageUpdate', async (oldMessage, newMessage) => {
+
+    if (oldMessage.partial) {
+		// try catch for fetching
+		try {
+			await oldMessage.fetch();
+		} catch (error) {
+			console.log('Something went wrong when fetching the message: ', error);
+			return;
+		}
+	}
+
+
     // FIXME oldMessage / newMessage returns null when editing before bot restart
+    // TODO add check for guild / change const for edit channel
     if (!oldMessage.guild) return;
     if (oldMessage === null) return deleteChannel.send(`Probably tried to edit a message before bot restart, won't log`)
     if (oldMessage.author.bot) return;
