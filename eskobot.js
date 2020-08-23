@@ -112,7 +112,7 @@ client.on('message', message => {
     // Server only command check
     if (!command && message.channel.type !== 'text') {
         // Insert Modmail logic here
-        message.reply('test');
+        //antiSpam.message(message)
     } else if (!command) { return;
     } else if (message.content.startsWith(prefix) && command.guildOnly && message.channel.type !== 'text') {
         return message.reply('I can\'t execute that command inside DMs!');
@@ -232,7 +232,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
     
     // TODO Add Rules / Welcome Function
     // Rules / Welcome Function
-    if (reaction.message.id === '745376506364297316' && reaction.emoji.name === '📚'); {
+    if (reaction.message.id === '746136542560387253' && reaction.emoji.name === '📚'); {
         // Find role Pupil and add it to the user
         const role = reaction.message.guild.roles.cache.find(role => role.name === 'Pupil');
         const member = reaction.message.guild.members.cache.find(u => u.user === user);
@@ -288,26 +288,50 @@ client.on('messageDelete', async message => {
 		try {
 			await message.fetch();
 		} catch (error) {
-			console.log('Something went wrong when fetching the message: ', error);
-			return;
+            if (error = 'DiscordAPIError: Unknown Message') {return console.log("User deleted a message prior to bot update, wont log");
+            } else { return console.log('Something went wrong when fetching the message: ', error)};
 		}
-	}
+    }
 
-
+    try {
+        await message.channel.messages.cache.find(m => m.id === message.id)
+    } catch (error) {
+        console.log(`Something went wrong when trying to fetch message from cache in messageDelete`, error);
+    }
+    
     const deleteChannel = client.channels.cache.get('744966412262703265')
-    // TODO add check for guild / change const for edit channel
-    // ignore direct messages
-    if (!message.guild) return;
-    // FIXME message returns null when deleted before bot restart
-    if (message === null) return deleteChannel.send(`Probably tried to delete a message before bot restart, won't log`)
-    if (message.author.bot) return;
+    const member = message.guild.members.cache.find(u => u.user === message.author);
 
-	deleteChannel.send(`A message by ${message.author} was deleted, but we don't know by who: \n\`${message.content}\``);
+    try {
+        if (!message.guild) return;
+        if (!member) return;
+        if (member.bot) return;
+        if ((message.content || message.author) === undefined) return console.log(`Probably tried to delete a message before bot restart, won't log`)
+    } catch (error) {
+        return console.log(`There was an error in conditions of messageDelete`, error);
+    }
+    try {
+        deleteChannel.send(`A message by ${message.author} was deleted, but we don't know by who: \n\`${message.content}\``);
+    } catch (error) {
+        return console.log(`There was an error sending a message to deleteChannel in messageDelete`, error);
+    }
+	
 });
 
 // Client message edit logger
 
 client.on('messageUpdate', async (oldMessage, newMessage) => {
+
+    const editChannel = client.channels.cache.get('744966289310744668')
+    const rules = '735537345981579457'
+    const getRoles = '744536926757060683'
+
+    
+    // TODO add staff chats to the list of ignored channels
+    if (newMessage.channel.id === (rules || getRoles)) return
+    //if (!oldMessage.guild.id === '731220209511432334') return;
+    if (!oldMessage.guild || !newMessage.guild) return;
+    
 
     if (oldMessage.partial) {
 		// try catch for fetching
@@ -317,18 +341,31 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
 			console.log('Something went wrong when fetching the message: ', error);
 			return;
 		}
-	}
+    }
 
+    try {
+        await oldMessage.channel.messages.cache.find(m => m.id === oldMessage.id)
+    } catch (error) {
+        console.log('Something went wrong with fetching the message id', error)
+    }
 
-    // FIXME oldMessage / newMessage returns null when editing before bot restart
-    // TODO add check for guild / change const for edit channel
-    if (!oldMessage.guild) return;
-    if (oldMessage === null) return deleteChannel.send(`Probably tried to edit a message before bot restart, won't log`)
-    if (oldMessage.author.bot) return;
+    if (oldMessage.content === undefined) return console.log('oldMessage is returning undefined, probably edited a message before bot was restarted. May not log')
+    
 
-    const editChannel = client.channels.cache.get('744966289310744668')
+    if (newMessage.partial) {
+		// try catch for fetching
+		try {
+			await newMessage.fetch();
+		} catch (error) {
+			console.log('Something went wrong when fetching the message: ', error);
+			return;
+		}
+    }
+    
+    const user = oldMessage.guild.members.cache.find(u => u.user === newMessage.author)
+    if (user.bot) return;
 
-    editChannel.send(`${oldMessage.author} edited a message: \nOld Message\: \`${oldMessage.content}\` \nNew Message\: \`${newMessage.content}\``)
+    editChannel.send(`${newMessage.author} edited a message in \`${newMessage.channel.name}\`: \nOld Message\: \`${oldMessage.content}\` \n\nNew Message\: \`${newMessage.content}\``)
 
 });
 
