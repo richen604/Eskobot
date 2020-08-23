@@ -36,6 +36,10 @@ TODO all server related constants should be in config.json for simplicity
 - at this point I can have the bot serve multiple servers
 - probably need to add a bunch of guild and member checks though
 
+TODO Update Readme to show for these constants
+
+TODO Config to turn features of the bot off
+
 TODO FUN use canvas to set up a welcome image for users
 
 TODO: USER HISTORY: Function to send (reason) to user database

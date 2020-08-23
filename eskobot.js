@@ -216,6 +216,11 @@ client.on('messageReactionAdd', async (reaction, user) => {
     const contentVote = '735951123898302614'
     const getRoles = '744536926757060683'
     const rules = '735537345981579457'
+
+    let guildId = message.guild.id;
+
+    //ignore other servers until i set them up
+    if (guildId !== `731220209511432334`) return
     
     // only listen for reactions in channels we want to handle reactions
     if (!reaction.message.channel.id === (lfgVote || contentVote || getRoles || rules)) return;
@@ -256,6 +261,11 @@ client.on('messageReactionRemove', async (reaction, user) => {
     const getRoles = '744536926757060683'
     const rules = '735537345981579457'
 
+    let guildId = message.guild.id;
+
+    // ignore other servers until i set them up
+    if (guildId !== `731220209511432334`) return
+
     // only listen for reactions in channels we want to handle reactions
     if (reaction.message.channel.id !== (lfgVote || contentVote || getRoles || rules)) return;
 	// if partial check
@@ -283,6 +293,14 @@ client.on('messageReactionRemove', async (reaction, user) => {
 
 client.on('messageDelete', async message => {
 
+    let guildId = message.guild.id;
+
+
+    // ignore logs from other servers until i set them up
+    if (guildId !== `731220209511432334`) return
+
+    if (!message.guild) return;
+
     if (message.partial) {
 		// try catch for fetching
 		try {
@@ -303,7 +321,6 @@ client.on('messageDelete', async message => {
     const member = message.guild.members.cache.find(u => u.user === message.author);
 
     try {
-        if (!message.guild) return;
         if (!member) return;
         if (member.bot) return;
         if ((message.content || message.author) === undefined) return console.log(`Probably tried to delete a message before bot restart, won't log`)
@@ -325,6 +342,10 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
     const editChannel = client.channels.cache.get('744966289310744668')
     const rules = '735537345981579457'
     const getRoles = '744536926757060683'
+    let guildId = message.guild.id;
+
+    // ignore logs from other servers until i set them up
+    if (guildId !== `731220209511432334`) return
 
     
     // TODO add staff chats to the list of ignored channels
