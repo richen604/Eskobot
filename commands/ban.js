@@ -2,7 +2,7 @@ module.exports = {
     name: 'ban',
     description: 'Bans the user from this server',
     guildOnly: 'true',
-    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy'],
+    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy', ".", "+"],
     log: 'true', 
     execute(client, message, args, punishmentLog) {
         const member = message.mentions.members.first() || client.users.resolve(args[0]);

@@ -31,7 +31,7 @@ module.exports = {
 
         if (!command) {
             return message.reply('That\'s not a valid command!');
-        } else if (command.staffRoles) {
+        } else if (!command.staffRoles) {
             return message.reply('You don\'t have permission to use help for this command!');
         }
 

@@ -5,7 +5,7 @@ module.exports = {
     cooldown: '5',
     description: 'Removes all messages from all users in the channel, up to 100.',
     guildOnly: 'true',
-    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy'],
+    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy', "."],
     execute(client, message, args) {
         // get the delete count, as an actual number.
         const deleteCount = parseInt(args[0], 10);

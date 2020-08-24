@@ -93,7 +93,7 @@ client.on('guildDelete', guild => {
 
 // CLIENT ON MESSAGE
 
-client.on('message', message => {
+client.on('message', async message => {
 
     // Message event, constant
     // ignore bots/self
@@ -111,11 +111,46 @@ client.on('message', message => {
 
     // Server only command check
     if (!command && message.channel.type !== 'text') {
-        // Insert Modmail logic here
-        //antiSpam.message(message)
+        // TODO Insert Modmail logic here
+
+        let guild = client.guilds.cache.get(`731220209511432334`),
+            USER_ID = message.author.id
+        if (!guild.member(USER_ID)) return console.log(`User who DM'd bot isn't in the Infado server`)
+
+        if (message.author.bot) return
+
+        let chan = guild.channels.cache.find(c => c.name === USER_ID)
+
+        // Channel exists check
+        if (chan) {
+            // send message to open ticket
+            if (message.author.id === chan.name) {
+                await chan.send(message)
+                .catch(err => console.log('There was a error with sending message to an open ticket in modmail', err))
+            }
+            return
+        } else {
+            //creates the channel with userid as the name
+            const ticket = await guild.channels.create(USER_ID, {
+                type: 'text',
+                parent: "747457097762865203" // id of ticket channel category
+            })
+            .catch(err => console.log("There was an error with making channel for modmail", err))
+
+            //sends first messages to channel
+            //TODO create an embed listing userdata (use userlog)
+            //TODO change channel.send which sends a bot message to an actual user message (will fix antispam not working)
+            // BUG antispam won't listen to bot messages
+            const channel = client.channels.cache.get(ticket.id)
+            await channel.send(message.author.tag)
+            await channel.send(message)
+            .catch(err => console.log("There was an error sending messages after creating channel in modmail", err))
+            
+        }
+
     } else if (!command) { return;
     } else if (message.content.startsWith(prefix) && command.guildOnly && message.channel.type !== 'text') {
-        return message.reply('I can\'t execute that command inside DMs!');
+        return;
     }
 
     if (!command && !message.content.startsWith(prefix)) return;
@@ -144,7 +179,7 @@ client.on('message', message => {
         cooldowns.set(command.name, new Discord.Collection());
     }
 
-    const now = Date.now();
+    let now = Date.now();
     const timestamps = cooldowns.get(command.name);
     const cooldownAmount = (command.cooldown || 3) * 1000;
 
@@ -216,11 +251,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
     const contentVote = '735951123898302614'
     const getRoles = '744536926757060683'
     const rules = '735537345981579457'
-
-    let guildId = message.guild.id;
-
-    //ignore other servers until i set them up
-    if (guildId !== `731220209511432334`) return
     
     // only listen for reactions in channels we want to handle reactions
     if (!reaction.message.channel.id === (lfgVote || contentVote || getRoles || rules)) return;
@@ -233,7 +263,11 @@ client.on('messageReactionAdd', async (reaction, user) => {
 			console.log('Something went wrong when fetching the message: ', error);
 			return;
 		}
-	}
+    }
+    
+    let guildId = reaction.message.guild.id;
+    // ignore other servers until i set them up
+    if (guildId !== `731220209511432334`) return
     
     // TODO Add Rules / Welcome Function
     // Rules / Welcome Function
@@ -261,10 +295,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
     const getRoles = '744536926757060683'
     const rules = '735537345981579457'
 
-    let guildId = message.guild.id;
-
-    // ignore other servers until i set them up
-    if (guildId !== `731220209511432334`) return
+   
 
     // only listen for reactions in channels we want to handle reactions
     if (reaction.message.channel.id !== (lfgVote || contentVote || getRoles || rules)) return;
@@ -277,7 +308,11 @@ client.on('messageReactionRemove', async (reaction, user) => {
 			console.log('Something went wrong when fetching the message: ', error);
 			return;
 		}
-	}
+    }
+    
+    let guildId = reaction.guild.id;
+    // ignore other servers until i set them up
+    if (guildId !== `731220209511432334`) return
     
     // TODO Add Roles Removal Function
     // Roles Removal Function
@@ -293,12 +328,6 @@ client.on('messageReactionRemove', async (reaction, user) => {
 
 client.on('messageDelete', async message => {
 
-    let guildId = message.guild.id;
-
-
-    // ignore logs from other servers until i set them up
-    if (guildId !== `731220209511432334`) return
-
     if (!message.guild) return;
 
     if (message.partial) {
@@ -310,6 +339,10 @@ client.on('messageDelete', async message => {
             } else { return console.log('Something went wrong when fetching the message: ', error)};
 		}
     }
+
+    let guildId = message.guild.id;
+    // ignore logs from other servers until i set them up
+    if (guildId !== `731220209511432334`) return
 
     try {
         await message.channel.messages.cache.find(m => m.id === message.id)
@@ -342,17 +375,14 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
     const editChannel = client.channels.cache.get('744966289310744668')
     const rules = '735537345981579457'
     const getRoles = '744536926757060683'
-    let guildId = message.guild.id;
-
-    // ignore logs from other servers until i set them up
-    if (guildId !== `731220209511432334`) return
+    
 
     
     // TODO add staff chats to the list of ignored channels
     if (newMessage.channel.id === (rules || getRoles)) return
     //if (!oldMessage.guild.id === '731220209511432334') return;
     if (!oldMessage.guild || !newMessage.guild) return;
-    
+    if (newMessage.bot) return
 
     if (oldMessage.partial) {
 		// try catch for fetching
@@ -382,6 +412,10 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
 			return;
 		}
     }
+
+    let guildId = newMessage.guild.id;
+    // ignore logs from other servers until i set them up
+    if (guildId !== `731220209511432334`) return
     
     const user = oldMessage.guild.members.cache.find(u => u.user === newMessage.author)
     if (user.bot) return;

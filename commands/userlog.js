@@ -6,7 +6,7 @@ module.exports = {
     args: 'true',
     usage: '<username> | <userid>',
     guildOnly: "true",
-    staffRoles: ['Exec. Director', '+'],
+    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy', ".", "+"],
     execute(client, message, args, punishmentLog) {
         try {
             async function f() {

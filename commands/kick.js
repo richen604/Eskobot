@@ -4,7 +4,7 @@ module.exports = {
     aliases: ['boot'],
     description: 'Boots a user out of the server',
     guildOnly: 'true', 
-    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy'],
+    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy', "."],
     log: 'true',
     execute(client, message, args)  {
         // user mention check

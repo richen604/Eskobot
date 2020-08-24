@@ -2,7 +2,7 @@ module.exports = {
     name: 'unmute',
     description: 'Removes muted role from user',
     guildOnly: 'true',
-    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy'],
+    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy', "."],
     execute(client, message, args) {
         const member = message.mentions.members.first() || client.users.resolve(args[0]);
         if (!member) { return message.reply('Please mention a valid member of this server'); }

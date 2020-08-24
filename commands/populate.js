@@ -3,7 +3,7 @@ module.exports = {
     description: "takes an array of links and embeds it to the channel",
     args: 'true',
     guildOnly: 'true',
-    staffRoles: ['Exec. Director', '+'],
+    staffRoles: ['Exec. Director', '+', "."],
     execute(client,message,args,punishmentLog) {
         if (!typeof args === 'array') { return message.reply('Please provide an array of links')};
         
