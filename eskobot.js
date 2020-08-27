@@ -17,7 +17,7 @@ const antiSpam = new AntiSpam({
 	maxDuplicatesKick: 10, // Amount of duplicate messages that trigger a warning.
 	maxDuplicatesBan: 12, // Amount of duplicate messages that trigger a warning.
 	exemptPermissions: [ 'ADMINISTRATOR', 'KICK_MEMBERS', 'BAN_MEMBERS'], // Bypass users with any of these permissions.
-	ignoreBots: true, // Ignore bot messages.
+	ignoreBots: false, // Ignore bot messages.
 	verbose: true, // Extended Logs from module.
 	ignoredUsers: [], // Array of User IDs that get ignored.
 	// And many more options... See the documentation.
@@ -96,8 +96,8 @@ client.on('guildDelete', guild => {
 client.on('message', async message => {
 
     // Message event, constant
-    // ignore bots/self
-    if (message.author.bot) return;
+    // ignore bots/self => REMOVED FOR TESTING MODMAIL
+    //if (message.author.bot) return;
 
     antiSpam.message(message);
     // split command and args, args being sliced array
@@ -139,13 +139,41 @@ client.on('message', async message => {
 
             //sends first messages to channel
             //TODO create an embed listing userdata (use userlog)
-            //TODO change channel.send which sends a bot message to an actual user message (will fix antispam not working)
-            // BUG antispam won't listen to bot messages
+            // TODO create a small embed for user messages
+            //TODO create !reply command for staff
+            // TODO create an embed for staff replies to dm
+            // BUG antispam won't listen to bot messages => modmail spam will be an issue
+
             const channel = client.channels.cache.get(ticket.id)
+
+            // New embed with User Log Data
+            try {
+                    // arg will be name or id of user 
+                    const tagList = await punishmentLog.findAll({ where: { userid: USER_ID } });
+                    let username = await punishmentLog.findOne({ where: {userid: USER_ID}});
+
+                    const exampleEmbed = new Discord.MessageEmbed()
+                    .setColor('#6A0DAD')
+                    .setTitle(`Staff Log`)
+                    .setDescription(`User history for ${member}`)
+                    .setThumbnail(member.avatarURL())
+                    if (username){
+                        tagList.forEach(t => {
+                        exampleEmbed.addFields(
+                            { name: `id\: ${t.id} \| ${t.punishment} for ${t.reason}`, value: `Done by Staff: ${t.staffName}`}
+                        )})
+                    } else {
+                        exampleEmbed.addFields({name: `This user has no punishment history`})
+                    }
+                    await channel.send(exampleEmbed);
+            } catch (e) {
+                console.log(`There was an issue with the userlog Modmail function`, e);
+            }
+
             await channel.send(message.author.tag)
             await channel.send(message)
             .catch(err => console.log("There was an error sending messages after creating channel in modmail", err))
-            
+            return
         }
 
     } else if (!command) { return;
@@ -207,9 +235,11 @@ client.on('message', async message => {
     //FIXME log continues even if error
     if (command.log) {
         try {
+            
             async function f() {
+                const user = message.mentions.users.first() || client.users.resolve(args[0]);
                 const log = await punishmentLog.create({
-                    userid: message.author.id,
+                    userid: user.id,
                     username: args[0],
                     punishment: command.name,
                     reason: args.slice(1).join(' '),
@@ -382,7 +412,7 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
     if (newMessage.channel.id === (rules || getRoles)) return
     //if (!oldMessage.guild.id === '731220209511432334') return;
     if (!oldMessage.guild || !newMessage.guild) return;
-    if (newMessage.bot) return
+    
 
     if (oldMessage.partial) {
 		// try catch for fetching
@@ -412,6 +442,8 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
 			return;
 		}
     }
+
+    if (newMessage.author.bot || oldMessage.author.bot) return
 
     let guildId = newMessage.guild.id;
     // ignore logs from other servers until i set them up

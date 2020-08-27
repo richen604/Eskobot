@@ -6,13 +6,16 @@ NEXT COMMIT
 // TODO TICKETS: Modmail Bot
 + Ticket Channel Category
 + bot responds to dms with a placeholder
-- User messages bot => bot creates channel in ticket channel
++ User messages bot => bot creates channel in ticket channel
 - Staff are pinged on ticket open
 - !close {reason} closes the ticket
 - tickets have an embed for a todo script for handling
 - !reply [reply] sends a response to the user => so staff can discuss the ticket
 - anti spam on ticket
 - anti group chat for bot
+
+TODO staffhistory with ticket database
+- reuse the ticket database to show ticket history for staff
 
 TODO ROLES: emote role setter
 *expected function*

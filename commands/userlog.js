@@ -6,7 +6,7 @@ module.exports = {
     args: 'true',
     usage: '<username> | <userid>',
     guildOnly: "true",
-    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy', ".", "+"],
+    staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy', ".", "+", "Mascot"],
     execute(client, message, args, punishmentLog) {
         try {
             async function f() {
@@ -16,22 +16,26 @@ module.exports = {
                 if (!member) { return message.reply('Please mention a valid member of this server'); }
                 const tagList = await punishmentLog.findAll({ where: { username: name } } || {where: { userid: name}});
                 let username = await punishmentLog.findOne({ where: {username: name}});
+                
+                const exampleEmbed = new Discord.MessageEmbed()
+                .setColor('#6A0DAD')
+                .setTitle(`Staff Log`)
+                .setDescription(`User history for ${member}`)
+                .setThumbnail(member.avatarURL())
                 if (username){
-                    const exampleEmbed = new Discord.MessageEmbed()
-                    .setColor('#6A0DAD')
-                    .setTitle(`Staff Log`)
-                    .setDescription(`User history for ${member}`)
-                    .setThumbnail(member.avatarURL())
                     tagList.forEach(t => {
-                        exampleEmbed.addFields(
-                            { name: `id\: ${t.id} \| ${t.punishment} for ${t.reason}`, value: `Done by Staff: ${t.staffName}`}
-                        )
-                    })
-                    return message.channel.send(exampleEmbed);
-            } else { message.reply('User not found')}
+                    exampleEmbed.addFields(
+                        { name: `id\: ${t.id} \| ${t.punishment} for ${t.reason}`, value: `Done by Staff: ${t.staffName}`}
+                    )})
+                } else {
+                    console.log('No history for user')
+                    exampleEmbed.addFields({name: `This user has no punishment history`})
+                }
+                await message.channel.send(exampleEmbed);
+                return
             }f()
         } catch (e) {
-            return console.log(e);
+            return console.log(`There was an issue with the !userlog command`, e);
         }
         
         // TODO: Change username arg to ping => requires changes in addtag.js
