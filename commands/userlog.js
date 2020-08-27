@@ -12,6 +12,7 @@ module.exports = {
             async function f() {
                 // arg will be name or id of user 
                 const name = args[0];
+                console.log(typeof name)
                 const member = message.mentions.users.first() || client.users.resolve(args[0]);
                 if (!member) { return message.reply('Please mention a valid member of this server'); }
                 const tagList = await punishmentLog.findAll({ where: { username: name } } || {where: { userid: name}});

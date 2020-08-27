@@ -115,6 +115,7 @@ client.on('message', async message => {
 
         let guild = client.guilds.cache.get(`731220209511432334`),
             USER_ID = message.author.id
+            USER = guild.member(USER_ID)
         if (!guild.member(USER_ID)) return console.log(`User who DM'd bot isn't in the Infado server`)
 
         if (message.author.bot) return
@@ -145,7 +146,8 @@ client.on('message', async message => {
             // BUG antispam won't listen to bot messages => modmail spam will be an issue
 
             const channel = client.channels.cache.get(ticket.id)
-
+            const member = client.users.resolve(USER)
+            
             // New embed with User Log Data
             try {
                     // arg will be name or id of user 
@@ -171,6 +173,7 @@ client.on('message', async message => {
             }
 
             await channel.send(message.author.tag)
+            //await channel.send(`!userlog <@${message.author.id}>`)
             await channel.send(message)
             .catch(err => console.log("There was an error sending messages after creating channel in modmail", err))
             return
