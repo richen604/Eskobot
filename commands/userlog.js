@@ -11,25 +11,21 @@ module.exports = {
         try {
             async function f() {
                 // arg will be name or id of user 
-                const name = args[0];
-                console.log(typeof name)
                 const member = message.mentions.users.first() || client.users.resolve(args[0]);
                 if (!member) { return message.reply('Please mention a valid member of this server'); }
-                const tagList = await punishmentLog.findAll({ where: { username: name } } || {where: { userid: name}});
-                let username = await punishmentLog.findOne({ where: {username: name}});
+                const tagList = await punishmentLog.findAll({ where: { userid: member.id } })
                 
                 const exampleEmbed = new Discord.MessageEmbed()
                 .setColor('#6A0DAD')
                 .setTitle(`Staff Log`)
                 .setDescription(`User history for ${member}`)
                 .setThumbnail(member.avatarURL())
-                if (username){
+                if (tagList){
                     tagList.forEach(t => {
                     exampleEmbed.addFields(
                         { name: `id\: ${t.id} \| ${t.punishment} for ${t.reason}`, value: `Done by Staff: ${t.staffName}`}
                     )})
                 } else {
-                    console.log('No history for user')
                     exampleEmbed.addFields({name: `This user has no punishment history`})
                 }
                 await message.channel.send(exampleEmbed);

@@ -42,7 +42,7 @@ const sequelize = new Sequelize('database', 'user', 'password', {
 // Set up table and tags (TESTING)
 
 const punishmentLog = sequelize.define('punishmentLog', {
-    userid: Sequelize.INTEGER,
+    userid: Sequelize.STRING,
     username: Sequelize.STRING,
     punishment: Sequelize.STRING,
     reason: Sequelize.STRING,
@@ -104,10 +104,12 @@ client.on('message', async message => {
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
 
+    //MEMBER init   
+    const member = message.mentions.members.first() || client.users.resolve(args[0]);
+
     // command init
     const command = client.commands.get(commandName) ||
         client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-
 
     // Server only command check
     if (!command && message.channel.type !== 'text') {
@@ -228,21 +230,22 @@ client.on('message', async message => {
     setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
     try {
-        command.execute(client, message, args, punishmentLog);
+        command.execute(client, message, args, punishmentLog,);
     } catch (error) {
         console.error(error);
         message.reply(`Couldn't execute that command because of \`${error}\``);
     }
 
     // logs punishment if log is true in module
-    //FIXME log continues even if error
+    //TODO Create a function that passes member because this bullshit is ridiculous
+    //TODO add that function to all command.log
+
+
     if (command.log) {
         try {
-            
-            async function f() {
-                const user = message.mentions.users.first() || client.users.resolve(args[0]);
+            async function f(client, message, args, punishmentLog, member) {
                 const log = await punishmentLog.create({
-                    userid: user.id,
+                    userid: member.id,
                     username: args[0],
                     punishment: command.name,
                     reason: args.slice(1).join(' '),
@@ -256,7 +259,7 @@ client.on('message', async message => {
                 return message.reply(`Log ${log.username} added.`);
                 
             }
-            f()
+            f(client, message, args, punishmentLog, member)
         }
         catch (e) {
             if (e.name === 'SequelizeUniqueConstraintError') {
@@ -266,6 +269,7 @@ client.on('message', async message => {
              return message.reply("Something went wrong with adding a log.");
         }
     }
+
 
 });
 

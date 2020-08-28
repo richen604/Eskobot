@@ -10,6 +10,7 @@ module.exports = {
     log: 'true',
     execute(client, message, args) {
         const member = message.mentions.members.first() || client.users.resolve(args[0]);
+        console.log(member)
         if (!member) { return message.reply('Please mention a valid member of this server'); }
 
         const muterole = message.guild.roles.cache.find(r => r.name === 'Muted');
