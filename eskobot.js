@@ -104,9 +104,6 @@ client.on('message', async message => {
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
 
-    //MEMBER init   
-    const member = message.mentions.members.first() || client.users.resolve(args[0]);
-
     // command init
     const command = client.commands.get(commandName) ||
         client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
@@ -175,7 +172,6 @@ client.on('message', async message => {
             }
 
             await channel.send(message.author.tag)
-            //await channel.send(`!userlog <@${message.author.id}>`)
             await channel.send(message)
             .catch(err => console.log("There was an error sending messages after creating channel in modmail", err))
             return
@@ -230,25 +226,27 @@ client.on('message', async message => {
     setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
     try {
-        command.execute(client, message, args, punishmentLog,);
+        command.execute(client, message, args, punishmentLog);
     } catch (error) {
         console.error(error);
         message.reply(`Couldn't execute that command because of \`${error}\``);
     }
 
     // logs punishment if log is true in module
-    //TODO Create a function that passes member because this bullshit is ridiculous
-    //TODO add that function to all command.log
-
-
     if (command.log) {
         try {
-            async function f(client, message, args, punishmentLog, member) {
+            async function f(client, message, args, punishmentLog) {
+                const user = message.mentions.members.first() || client.users.resolve(args[0])
+                const member = await message.guild.members.cache.find(m => m.id === user.id)
+
+                let reason = args.slice(1).join(' ');
+                if (!reason) reason = 'No reason provided';
+
                 const log = await punishmentLog.create({
                     userid: member.id,
-                    username: args[0],
+                    username: member.user.username,        
                     punishment: command.name,
-                    reason: args.slice(1).join(' '),
+                    reason: reason,
                     staffName: `<@${message.author.id}>`,
                 });
                 // sends to channel in MOOC server for staff log
@@ -259,7 +257,7 @@ client.on('message', async message => {
                 return message.reply(`Log ${log.username} added.`);
                 
             }
-            f(client, message, args, punishmentLog, member)
+            f(client, message, args, punishmentLog)
         }
         catch (e) {
             if (e.name === 'SequelizeUniqueConstraintError') {

@@ -9,8 +9,9 @@ module.exports = {
     staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy', "."],
     log: 'true',
     execute(client, message, args) {
-        const member = message.mentions.members.first() || client.users.resolve(args[0]);
-        console.log(member)
+        const user = message.mentions.members.first() || client.users.resolve(args[0])
+        const member = message.guild.members.cache.find(m => m.id === user.id)
+        
         if (!member) { return message.reply('Please mention a valid member of this server'); }
 
         const muterole = message.guild.roles.cache.find(r => r.name === 'Muted');

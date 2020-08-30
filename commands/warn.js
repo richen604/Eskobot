@@ -4,10 +4,12 @@ module.exports = {
     usage: '!warn <reason>',
     staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy', "."],
     log: 'true',
+    args: 'true',
     execute(client, message, args, punishmentLog) {
-        const member = message.mentions.members.first() || client.users.resolve(args[0]);
-        console.log(member.id)
-        if (!member) { return message.reply('Please mention a valid member of this server'); }
+        const user = message.mentions.members.first() || client.users.resolve(args[0])
+        if (!user) { return message.reply('Please mention a valid member of this server'); }
+        const member = message.guild.members.cache.find(m => m.id === user.id)
+        
         
         let reason = args.slice(1).join(' ');
         if (!reason) reason = 'No reason provided';
