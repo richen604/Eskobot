@@ -17,6 +17,7 @@ NEXT COMMIT
 TODO staffhistory with ticket database
 - reuse the ticket database to show ticket history for staff
 
+
 TODO ROLES: emote role setter
 *expected function*
 user clicks on emote in message and gets the role assigned

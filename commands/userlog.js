@@ -20,13 +20,13 @@ module.exports = {
                 .setTitle(`Staff Log`)
                 .setDescription(`User history for ${member}`)
                 .setThumbnail(member.avatarURL())
-                if (tagList){
+                if (tagList.length > 0){
                     tagList.forEach(t => {
                     exampleEmbed.addFields(
                         { name: `id\: ${t.id} \| ${t.punishment} for ${t.reason}`, value: `Done by Staff: ${t.staffName}`}
                     )})
                 } else {
-                    exampleEmbed.addFields({name: `This user has no punishment history`})
+                    exampleEmbed.addField(`Userlog`,`This user has no punishment history`)
                 }
                 await message.channel.send(exampleEmbed);
                 return

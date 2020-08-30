@@ -8,10 +8,10 @@ module.exports = {
     log: 'true',
     execute(client, message, args)  {
         // user mention check
-        const member = message.mentions.members.first() || client.users.resolve(args[0]);
-        if (!member) { return message.reply('Please mention a valid member of this server'); }
-        if (!member.kickable) { return message.reply('I cannot kick this user! Do they have a higher role? Do I have kick permissions?'); }
-
+        const user = message.mentions.members.first() || client.users.resolve(args[0]);
+        if (!user) { return message.reply('Please mention a valid member of this server'); }
+        if (!user.kickable) { return message.reply('I cannot kick this user! Do they have a higher role? Do I have kick permissions?'); }
+        const member = message.guild.members.cache.find(m => m.id === user.id)
         // reason join function / check
         let reason = args.slice(1).join(' ');
         if (!reason) reason = 'No reason provided';

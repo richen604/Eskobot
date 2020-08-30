@@ -96,8 +96,8 @@ client.on('guildDelete', guild => {
 client.on('message', async message => {
 
     // Message event, constant
-    // ignore bots/self => REMOVED FOR TESTING MODMAIL
-    //if (message.author.bot) return;
+    // ignore bots/self
+    if (message.author.bot) return;
 
     antiSpam.message(message);
     // split command and args, args being sliced array
@@ -116,63 +116,88 @@ client.on('message', async message => {
             USER_ID = message.author.id
             USER = guild.member(USER_ID)
         if (!guild.member(USER_ID)) return console.log(`User who DM'd bot isn't in the Infado server`)
+        const member = client.users.resolve(USER)
 
         if (message.author.bot) return
 
         let chan = guild.channels.cache.find(c => c.name === USER_ID)
 
+        //init User message Embed for multiple uses
+        const userEmbed = new Discord.MessageEmbed()
+        .setColor('#6A0DAD')
+        //.setTitle(`User Message`)
+        //.setAuthor(`${USER}, ID: ${USER_ID}`)
+        .setDescription(`${USER}, ID: ${USER_ID}`)
+        .setThumbnail(member.avatarURL())
+        .addField(`User Message`, message)
+        .setTimestamp()
+        
+
         // Channel exists check
         if (chan) {
             // send message to open ticket
             if (message.author.id === chan.name) {
-                await chan.send(message)
+                await chan.send(userEmbed)
                 .catch(err => console.log('There was a error with sending message to an open ticket in modmail', err))
             }
             return
         } else {
             //creates the channel with userid as the name
             const ticket = await guild.channels.create(USER_ID, {
-                type: 'text',
+                type: 'text', 
                 parent: "747457097762865203" // id of ticket channel category
             })
             .catch(err => console.log("There was an error with making channel for modmail", err))
 
             //sends first messages to channel
-            //TODO create an embed listing userdata (use userlog)
+            //TODO REFACTOR add modmail feature to module 
             // TODO create a small embed for user messages
-            //TODO create !reply command for staff
-            // TODO create an embed for staff replies to dm
             // BUG antispam won't listen to bot messages => modmail spam will be an issue
 
             const channel = client.channels.cache.get(ticket.id)
-            const member = client.users.resolve(USER)
+           
+
+            //User DM with Modmail message
+            try {
+                const modmailEmbed = new Discord.MessageEmbed()
+                //TODO Change color and create .setThumbnail for bot pfp
+                    .setColor('#6A0DAD')
+                    .setTitle(`Welcome to Modmail`)
+                    .setDescription(`We have sent your message to staff, expect a reply shortly. \nYou may continue to explain your issue here if needed.`)
+                    //.setThumbnail(member.avatarURL())
+                    .setFooter("Note: Misuse of Modmail may lead to punishment.")
+                    .setTimestamp()
+                    await member.send(modmailEmbed);
+            } catch (e) {
+                console.log("Modmail: Error sending initial DM embed", e)
+            }
             
             // New embed with User Log Data
             try {
                     // arg will be name or id of user 
                     const tagList = await punishmentLog.findAll({ where: { userid: USER_ID } });
-                    let username = await punishmentLog.findOne({ where: {userid: USER_ID}});
+                    //let username = await punishmentLog.findOne({ where: {userid: USER_ID}});
 
                     const exampleEmbed = new Discord.MessageEmbed()
                     .setColor('#6A0DAD')
                     .setTitle(`Staff Log`)
                     .setDescription(`User history for ${member}`)
                     .setThumbnail(member.avatarURL())
-                    if (username){
+                    if (tagList.length > 0){
                         tagList.forEach(t => {
                         exampleEmbed.addFields(
-                            { name: `id\: ${t.id} \| ${t.punishment} for ${t.reason}`, value: `Done by Staff: ${t.staffName}`}
+                            { name: `Log ID\: ${t.id} \| ${t.punishment} for ${t.reason}`, value: `Done by Staff: ${t.staffName}`}
                         )})
+                    } else if (tagList.length === 0) {
+                        exampleEmbed.addField('Userlog', `This user has no punishment history`)
                     } else {
-                        exampleEmbed.addFields({name: `This user has no punishment history`})
+                        console.log(`error with userlog function: tagList`)
                     }
                     await channel.send(exampleEmbed);
             } catch (e) {
                 console.log(`There was an issue with the userlog Modmail function`, e);
             }
-
-            await channel.send(message.author.tag)
-            await channel.send(message)
+            await channel.send(userEmbed)
             .catch(err => console.log("There was an error sending messages after creating channel in modmail", err))
             return
         }
@@ -233,6 +258,7 @@ client.on('message', async message => {
     }
 
     // logs punishment if log is true in module
+    //TODO add this to a module
     if (command.log) {
         try {
             async function f(client, message, args, punishmentLog) {
@@ -250,9 +276,10 @@ client.on('message', async message => {
                     staffName: `<@${message.author.id}>`,
                 });
                 // sends to channel in MOOC server for staff log
+                // TODO turn this into embed, combine stafflog, deletelog, and editlog
                 const channel = client.channels.cache.get(staffLog)
                 if (channel) {
-                    channel.send(`id\: ${log.id} \| user\: ${log.username} \| ${log.punishment} for ${log.reason} | Done by Staff: ${log.staffName}`)
+                    channel.send(`Log ID\: ${log.id} \| user\: ${log.username} \| ${log.punishment} for ${log.reason} | Done by Staff: ${log.staffName}`)
                 }
                 return message.reply(`Log ${log.username} added.`);
                 
