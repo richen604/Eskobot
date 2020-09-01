@@ -1,29 +1,27 @@
 NEXT COMMIT
 
 
-// TODO LOGGING: Logs vc join and leave
-
-// TODO TICKETS: Modmail Bot
-+ Ticket Channel Category
-+ bot responds to dms with a placeholder
-+ User messages bot => bot creates channel in ticket channel
-- Staff are pinged on ticket open
-- !close {reason} closes the ticket
-- tickets have an embed for a todo script for handling
-- !reply [reply] sends a response to the user => so staff can discuss the ticket
-- anti spam on ticket
-- anti group chat for bot
-
-TODO staffhistory with ticket database
-- reuse the ticket database to show ticket history for staff
-
-
 TODO ROLES: emote role setter
 *expected function*
 user clicks on emote in message and gets the role assigned
 *possible way to get there*
 - have an event handler for reacting on specific messages and a command to add the message id to the handler?
 - could also have the ids manually pasted in config.json in an array
+
+-borrow feature from modmail role finder
+
+-Create !strenght, !interest command from get-roles.md
+    -use messageid from this for listener
+
+-Message with Main Roles
+
+-Listener for Main Role
+
+-Message with Sub Roles
+
+-Listener for Sub Roles
+
+
 
 TODO CONTENT: emote voting function
 *expected function*
@@ -32,9 +30,47 @@ reacts for specific messages vote for the content to be posted in another channe
 - user or staff !startVote command? takes link as arg and starts an event handler?
 - have the amount of votes required in a const, maybe editable by the command by staff?
 
+-Listener for Channel
+    -Have channel add initial reacts to every message in channel
+    -Have config for vote threshold 
+    -Threshold reached in lfg creates lfg channel and content channel
+    -Threshold reached in content alerts staff to organize
+        -opens ticket in modmail
+    -Check if lfg channel exists (array of names)
+    - (Optional) have list of content prepared for when LFG channel is created (top courses in field)
+
+TODO Decide on name
+
+TODO Make Logo
+
+TODO Write Welcome Page, fill minor content
+
+TODO Server Organization
+
+
+
+TODO LOGGING: User join and leave
+
+TODO LOGGING: Logs vc join and leave
+
 // TODO ERROR: change server messages for bot to dm me for errors
 
 // TODO HELP: help should be dm as well
+
+// TODO TICKETS: Modmail Bot
++ Ticket Channel Category
++ bot responds to dms with a placeholder
++ User messages bot => bot creates channel in ticket channel
+- Staff are pinged on ticket open
+/ !close {reason} closes the ticket
+/ tickets have an embed for a todo script for handling
++ !reply [reply] sends a response to the user => so staff can discuss the ticket
+- anti spam on ticket
+- anti group chat for bot
+
+TODO staffhistory with ticket database
+- reuse the ticket database to show ticket history for staff
+
 
 TODO all server related constants should be in config.json for simplicity
 - at this point I can have the bot serve multiple servers

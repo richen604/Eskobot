@@ -2,7 +2,11 @@
 // Load up the discord.js library
 const fs = require('fs');
 const Discord = require('discord.js');
-const { prefix, token, staffLog } = require('./config.json');
+const { 
+    prefix, token, staffLogChannel, strengthsMessageID, interestsMessageID,
+    lfgVoteChannel, contentVoteChannel, rolesChannel, rulesChannel, strengthsObj, interestsObj
+
+} = require('./config.json');
 const Sequelize = require('sequelize');
 const AntiSpam = require('discord-anti-spam');
 const antiSpam = new AntiSpam({
@@ -109,6 +113,7 @@ client.on('message', async message => {
         client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
     // Server only command check
+    //MODMAIL FUNCTION
     if (!command && message.channel.type !== 'text') {
         // TODO Insert Modmail logic here
 
@@ -181,7 +186,7 @@ client.on('message', async message => {
                     const exampleEmbed = new Discord.MessageEmbed()
                     .setColor('#6A0DAD')
                     .setTitle(`Staff Log`)
-                    .setDescription(`User history for ${member}`)
+                    .setDescription(`User history for ${member}, ID: ${member.id}`)
                     .setThumbnail(member.avatarURL())
                     if (tagList.length > 0){
                         tagList.forEach(t => {
@@ -244,21 +249,21 @@ client.on('message', async message => {
         if (now < expirationTime) {
             const timeLeft = (expirationTime - now) / 1000;
             return message.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
-        }
+        }getRoles
     }
 
     timestamps.set(message.author.id, now);
     setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
     try {
-        command.execute(client, message, args, punishmentLog);
+        command.execute(client, message, args, punishmentLog, rolesChannel, strengthsObj);
     } catch (error) {
         console.error(error);
         message.reply(`Couldn't execute that command because of \`${error}\``);
     }
 
     // logs punishment if log is true in module
-    //TODO add this to a module
+    //TODO add this to a modulegetRoles
     if (command.log) {
         try {
             async function f(client, message, args, punishmentLog) {
@@ -277,7 +282,7 @@ client.on('message', async message => {
                 });
                 // sends to channel in MOOC server for staff log
                 // TODO turn this into embed, combine stafflog, deletelog, and editlog
-                const channel = client.channels.cache.get(staffLog)
+                const channel = client.channels.cache.get(staffLogChannel)
                 if (channel) {
                     channel.send(`Log ID\: ${log.id} \| user\: ${log.username} \| ${log.punishment} for ${log.reason} | Done by Staff: ${log.staffName}`)
                 }
@@ -307,15 +312,9 @@ antiSpam.on("error", (message, error, type) => {
 // Client Reaction listener
 
 client.on('messageReactionAdd', async (reaction, user) => {
-
-    // TODO put these in config.json
-    const lfgVote = '735951916621627472'
-    const contentVote = '735951123898302614'
-    const getRoles = '744536926757060683'
-    const rules = '735537345981579457'
     
     // only listen for reactions in channels we want to handle reactions
-    if (!reaction.message.channel.id === (lfgVote || contentVote || getRoles || rules)) return;
+    if (!reaction.message.channel.id === (lfgVoteChannel || contentVoteChannel || rolesChannel || rulesChannel)) return;
     // if partial check
 	if (reaction.partial) {
 		// try catch for fetching
@@ -330,37 +329,50 @@ client.on('messageReactionAdd', async (reaction, user) => {
     let guildId = reaction.message.guild.id;
     // ignore other servers until i set them up
     if (guildId !== `731220209511432334`) return
+    let member = reaction.message.guild.members.cache.find(u => u.user === user);
+    //ignore reaction listener if it is from a bot
+    if (member.bot) return
     
-    // TODO Add Rules / Welcome Function
-    // Rules / Welcome Function
+    
+    
+    // RULES FUNCTION
+    //TODO Rules message id in config.json
     if (reaction.message.id === '746136542560387253' && reaction.emoji.name === '📚'); {
         // Find role Pupil and add it to the user
-        const role = reaction.message.guild.roles.cache.find(role => role.name === 'Pupil');
-        const member = reaction.message.guild.members.cache.find(u => u.user === user);
+        let role = reaction.message.guild.roles.cache.find(role => role.name === 'Pupil');
         member.roles.add(role);
     }
 
     // TODO Add Roles Add Function
-    // Roles Add Function
+    // ROLES ADD FUNCTION
+        //Strengths Role Add Function
+    if (reaction.message.id === strengthsMessageID) {
+        //collection of reactions that user is in
+        let userReactions = reaction.message.reactions.cache.filter(reaction => reaction.users.cache.has(member.id));
+        //checks strengthsObj for reaction => gives reaction value as a role
+        for (const key in strengthsObj){
+            if (reaction.emoji.name === key) {
+                let role = reaction.message.guild.roles.cache.find(r => r.name === strengthsObj[key])
+                //checks if member already has a Strengths role => removes reaction and returns
+                //BUG selecting roles fast wont remove the reaction
+                if (role) {
+                    for (const reaction of userReactions.values()) {
+                        await reaction.users.remove(member.id)
+                        return}}
+                await member.roles.add(role)
+        } 
+    }}
 
     // TODO Add Vote Add Function
-    // Vote Add Function
+    // VOTE ADD FUNCTION
 
     
 }); 
 
 client.on('messageReactionRemove', async (reaction, user) => {
 
-    // TODO put these in config.json
-    const lfgVote = '735951916621627472'
-    const contentVote = '735951123898302614'
-    const getRoles = '744536926757060683'
-    const rules = '735537345981579457'
-
-   
-
     // only listen for reactions in channels we want to handle reactions
-    if (reaction.message.channel.id !== (lfgVote || contentVote || getRoles || rules)) return;
+    if (!reaction.message.channel.id === (lfgVoteChannel || contentVoteChannel || rolesChannel || rulesChannel)) return;
 	// if partial check
 	if (reaction.partial) {
 		// try catch for fetching
@@ -372,12 +384,30 @@ client.on('messageReactionRemove', async (reaction, user) => {
 		}
     }
     
-    let guildId = reaction.guild.id;
+    let guildId = reaction.message.guild.id;
     // ignore other servers until i set them up
     if (guildId !== `731220209511432334`) return
+    let member = reaction.message.guild.members.cache.find(u => u.user === user);
     
     // TODO Add Roles Removal Function
+    console.log('before role removal')
     // Roles Removal Function
+    if (reaction.message.id === strengthsMessageID) {
+        console.log('inside role removal, before for loop')
+        //checks strengthsObj for reaction => removes reaction value as a role
+        for (const key in strengthsObj){
+            console.log('in for loop')
+            let role = reaction.message.guild.roles.cache.find(role => role.name === strengthsObj[key])
+            if (!role) return
+            if (reaction.emoji.name === key) {
+                console.log('in if statement, before role removal')
+                
+                await member.roles.remove(role)
+                console.log('after role removal')
+            }
+        } return
+        
+    }
 
     // TODO Add Vote Removal Function
     // Vote Removal Function

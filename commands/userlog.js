@@ -18,7 +18,7 @@ module.exports = {
                 const exampleEmbed = new Discord.MessageEmbed()
                 .setColor('#6A0DAD')
                 .setTitle(`Staff Log`)
-                .setDescription(`User history for ${member}`)
+                .setDescription(`User history for ${member}, ID: ${member.id}`)
                 .setThumbnail(member.avatarURL())
                 if (tagList.length > 0){
                     tagList.forEach(t => {
@@ -34,8 +34,6 @@ module.exports = {
         } catch (e) {
             return console.log(`There was an issue with the !userlog command`, e);
         }
-        
-        // TODO: Change username arg to ping => requires changes in addtag.js
-        // TODO: Make Embed better looking 
+    
     }
 }
