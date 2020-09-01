@@ -391,6 +391,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
     
     // TODO Add Roles Removal Function
     console.log('before role removal')
+    //test
     // Roles Removal Function
     if (reaction.message.id === strengthsMessageID) {
         console.log('inside role removal, before for loop')
