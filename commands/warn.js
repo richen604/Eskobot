@@ -14,7 +14,6 @@ module.exports = {
         let reason = args.slice(1).join(' ');
         if (!reason) reason = 'No reason provided';
 
-        message.channel.send(`${member.id}`)
         message.channel.send(`${member} has now been warned for ${reason}`)
     }
 }

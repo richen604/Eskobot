@@ -1,14 +1,16 @@
 /* eslint-disable brace-style */
 // Load up the discord.js library
 const fs = require('fs');
+const ms = require('ms')
 const Discord = require('discord.js');
 const { 
-    prefix, token, staffLogChannel, strengthsMessageID, interestsMessageID,
-    lfgVoteChannel, contentVoteChannel, rolesChannel, rulesChannel, strengthsObj, interestsObj
+    prefix, token, staffLogChannel, strengthsMessageID, interestsMessageID, lfgHubParentID, contentHubParentID,
+    lfgVoteChannel, contentVoteChannel, rolesChannel, rulesChannel, strengthsObj, interestsObj, rulesMessageID, guildID
 
 } = require('./config.json');
 const Sequelize = require('sequelize');
 const AntiSpam = require('discord-anti-spam');
+const strengths = require('./commands/strengths');
 const antiSpam = new AntiSpam({
 	warnThreshold: 3, // Amount of messages sent in a row that will cause a warning.
 	kickThreshold: 7, // Amount of messages sent in a row that will cause a ban.
@@ -76,9 +78,11 @@ const cooldowns = new Discord.Collection();
 
 
 // Bot start
-client.on('ready', () => {
+//TODO create a reaction debug that reacts to rulesMessageID
+client.on('ready', async () => {
     console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
     client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
+    //TODO find a way to do a quick react/unreact feature to debug listeners 
 });
 
 // sync Sequelize tags table
@@ -207,7 +211,12 @@ client.on('message', async message => {
             return
         }
 
-    } else if (!command) { return;
+    } else if (!command) { //INIT REACT FOR CONTENT VOTING
+        /*if (message.channel.id === contentVoteChannel){
+            await message.react('👍')
+        } else {
+            return;
+        }*/
     } else if (message.content.startsWith(prefix) && command.guildOnly && message.channel.type !== 'text') {
         return;
     }
@@ -275,16 +284,21 @@ client.on('message', async message => {
 
                 const log = await punishmentLog.create({
                     userid: member.id,
-                    username: member.user.username,        
+                    username: `${member}`,        
                     punishment: command.name,
                     reason: reason,
                     staffName: `<@${message.author.id}>`,
                 });
                 // sends to channel in MOOC server for staff log
-                // TODO turn this into embed, combine stafflog, deletelog, and editlog
                 const channel = client.channels.cache.get(staffLogChannel)
                 if (channel) {
-                    channel.send(`Log ID\: ${log.id} \| user\: ${log.username} \| ${log.punishment} for ${log.reason} | Done by Staff: ${log.staffName}`)
+                    let staffActionLogEmbed = new Discord.MessageEmbed()
+                    .setColor("PURPLE")
+                    .setAuthor(`Staff Action Log`)
+                    .setDescription(`Done by Staff ${log.staffName} to User: ${log.username} \`${log.userid}\``)
+                    .addField(`Action: ${log.punishment}`, `Reason: ${log.reason}`)
+                    .setFooter(`User Log ID: ${log.id}`)
+                    channel.send(staffActionLogEmbed)
                 }
                 return message.reply(`Log ${log.username} added.`);
                 
@@ -330,6 +344,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
     // ignore other servers until i set them up
     if (guildId !== `731220209511432334`) return
     let member = reaction.message.guild.members.cache.find(u => u.user === user);
+
     //ignore reaction listener if it is from a bot
     if (member.bot) return
     
@@ -337,34 +352,125 @@ client.on('messageReactionAdd', async (reaction, user) => {
     
     // RULES FUNCTION
     //TODO Rules message id in config.json
-    if (reaction.message.id === '746136542560387253' && reaction.emoji.name === '📚'); {
+    if (reaction.message.id === rulesMessageID && reaction.emoji.name === '📚'); {
         // Find role Pupil and add it to the user
         let role = reaction.message.guild.roles.cache.find(role => role.name === 'Pupil');
         member.roles.add(role);
     }
 
-    // TODO Add Roles Add Function
     // ROLES ADD FUNCTION
-        //Strengths Role Add Function
+    //Strengths Role Add Function
     if (reaction.message.id === strengthsMessageID) {
         //collection of reactions that user is in
-        let userReactions = reaction.message.reactions.cache.filter(reaction => reaction.users.cache.has(member.id));
-        //checks strengthsObj for reaction => gives reaction value as a role
-        for (const key in strengthsObj){
-            if (reaction.emoji.name === key) {
-                let role = reaction.message.guild.roles.cache.find(r => r.name === strengthsObj[key])
-                //checks if member already has a Strengths role => removes reaction and returns
-                //BUG selecting roles fast wont remove the reaction
-                if (role) {
-                    for (const reaction of userReactions.values()) {
-                        await reaction.users.remove(member.id)
-                        return}}
-                await member.roles.add(role)
-        } 
-    }}
+        const userReactions = reaction.message.reactions.cache.filter(reaction => reaction.users.cache.has(member.id));
+        const userReactionsArr = userReactions.keyArray();
+        const firstReact = userReactions.last();
+
+        //console logs if firstReact is undefined (bug)
+        //BUG if the user reacts after bot restart it will not give correct role => reaction returns undefined
+        //BUG If user reacts WITH REACTION after bot restart it not give correct role
+        //TODO list user strengths roles, if has role remove all reacts and roles except one if the reaction is a role the user has
+
+        //Strengths Roles exist check
+
+            /*const roleCheck = member.roles.cache.filter(role => role.name === strengthsObj[reaction.emoji.name])
+            if (!roleCheck || (reaction === roleCheck.last())) return
+            console.log(`Comparing value: ${value} to roleCheck: ${roleCheck}`)
+            await member.roles.remove(roleCheck)*/
+        
+
+
+        if (firstReact == undefined){
+            console.log(`Member id ${member.id} tried to select a Strength, may open ticket`)
+            return
+        //Adds Strengths Role if first
+        } else if (firstReact && (firstReact.emoji.name === reaction.emoji.name)){
+            const strengthsRole = reaction.message.guild.roles.cache.find(r => r.name === strengthsObj[firstReact.emoji.name])
+            await member.roles.add(strengthsRole)
+            return
+        //Removes react if already selected a role
+        } else if (firstReact && (userReactionsArr.length > 1)) {
+            for (const reaction of userReactions.values()) {
+                if (reaction.emoji.name === firstReact.emoji.name) return
+                await reaction.users.remove(member.id);
+            }
+            return
+        }
+        return
+
+    }
+
+    if (reaction.message.id === interestsMessageID){
+
+        //TODO if user has a strengthRole and applies an interestRole returns (vise versa)
+        const interestsRole = reaction.message.guild.roles.cache.find(r => r.name === interestsObj[reaction.emoji.name])
+        await member.roles.add(interestsRole)
+        return
+
+    }
 
     // TODO Add Vote Add Function
     // VOTE ADD FUNCTION
+
+    //LFG Vote Function
+    if (reaction.message.channel.id === lfgVoteChannel){
+
+        let lfgCount = 3
+        
+        //Changes lfgCount relative to how many channels exist
+        const getLfgHub = client.channels.cache.filter(c => c.parentID === lfgHubParentID)
+        let arr = getLfgHub.keyArray()
+        if (arr.length > 1) {
+            lfgCount = arr.length * 20
+        }
+        console.log(lfgCount)
+
+        //finds only the channels that are over lfg count
+        let reactionCount = reaction.message.reactions.cache.find(reaction => reaction.count >= lfgCount)
+        if (!reactionCount) return // ignores reacts that aren't greater or equal to the first lfgCount
+        await reaction.message.channel.messages.fetch() //fetches the messages from cache
+
+        // this gets the description for channel finding/making usage
+        const category = reaction.message.embeds[0]
+        const categoryName = category.fields[0].value.replace(/\s+/g, '-').toLowerCase()
+        
+        const getContentHub = client.channels.cache.filter(c => c.parentID === contentHubParentID)
+        
+        const findCategoryContent = client.channels.cache.find(c => c.name === categoryName)
+        const findCategoryLfg = client.channels.cache.find(c => c.name === categoryName)
+
+
+        //check if message.content / channel.name exist in both contentHub or lfgHub
+        if (findCategoryContent && findCategoryLfg) {
+            return console.log(`LfgVote: Channel ${category.fields[0].value} already exists`)
+        } else {
+            let guild = client.guilds.cache.get(guildID)
+            //creates channel in both Lfg-hub and Content-hub
+            //LFG-Hub
+            const lfgChannelCreate = await guild.channels.create(category.fields[0].value, {
+                type: 'text', 
+                parent: lfgHubParentID // id of lfg-hub channel category
+            })
+            .catch(err => console.log("There was an error with making channel for LfgVote", err))
+            //Content-Hub
+            const contentChannelCreate = await guild.channels.create(category.fields[0].value, {
+                type: 'text', 
+                parent: contentHubParentID // id of lfg-hub channel category
+            })
+            .catch(err => console.log("There was an error with making channel for ContentVote", err))
+        }
+    }
+
+
+    //CONTENT VOTING
+    /*if (reaction.channel.id === contentVoteChannel) {
+        let contentCount = 3 //number of votes for content to be posted
+        if (guild.memberCount > 50) {
+            contentCount = (guild.memberCount / 10)
+        }
+        let reactionCount = reaction.message.cache.find(reaction => reaction.count >= contentCount)
+        if (!reactionCount) return;
+    }*/
 
     
 }); 
@@ -377,7 +483,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 	if (reaction.partial) {
 		// try catch for fetching
 		try {
-			await reaction.fetch();
+            await reaction.fetch();
 		} catch (error) {
 			console.log('Something went wrong when fetching the message: ', error);
 			return;
@@ -389,25 +495,21 @@ client.on('messageReactionRemove', async (reaction, user) => {
     if (guildId !== `731220209511432334`) return
     let member = reaction.message.guild.members.cache.find(u => u.user === user);
     
-    // TODO Add Roles Removal Function
-    console.log('before role removal')
-    //test
     // Roles Removal Function
+
+    //Strengths Role
     if (reaction.message.id === strengthsMessageID) {
-        console.log('inside role removal, before for loop')
-        //checks strengthsObj for reaction => removes reaction value as a role
-        for (const key in strengthsObj){
-            console.log('in for loop')
-            let role = reaction.message.guild.roles.cache.find(role => role.name === strengthsObj[key])
-            if (!role) return
-            if (reaction.emoji.name === key) {
-                console.log('in if statement, before role removal')
-                
-                await member.roles.remove(role)
-                console.log('after role removal')
-            }
-        } return
-        
+        const strengthsRole = reaction.message.guild.roles.cache.find(r => r.name === strengthsObj[reaction.emoji.name])
+        await member.roles.remove(strengthsRole)
+    }
+    //Interests Role
+    if (reaction.message.id === interestsMessageID){
+
+        //TODO if user has a strengthRole and applies an interestRole returns (vise versa)
+        const interestsRole = reaction.message.guild.roles.cache.find(r => r.name === interestsObj[reaction.emoji.name])
+        await member.roles.remove(interestsRole)
+        return
+
     }
 
     // TODO Add Vote Removal Function
@@ -435,7 +537,7 @@ client.on('messageDelete', async message => {
 
     let guildId = message.guild.id;
     // ignore logs from other servers until i set them up
-    if (guildId !== `731220209511432334`) return
+    if (guildId !== guildID) return
 
     try {
         await message.channel.messages.cache.find(m => m.id === message.id)
@@ -443,7 +545,7 @@ client.on('messageDelete', async message => {
         console.log(`Something went wrong when trying to fetch message from cache in messageDelete`, error);
     }
     
-    const deleteChannel = client.channels.cache.get('744966412262703265')
+    const deleteChannel = client.channels.cache.get(staffLogChannel)
     const member = message.guild.members.cache.find(u => u.user === message.author);
 
     try {
@@ -454,9 +556,15 @@ client.on('messageDelete', async message => {
         return console.log(`There was an error in conditions of messageDelete`, error);
     }
     try {
-        deleteChannel.send(`A message by ${message.author} was deleted, but we don't know by who: \n\`${message.content}\``);
+        const deleteEmbed = new Discord.MessageEmbed()
+        .setColor('BLUE')
+        //TODO Add Garbage Can Icon to Author deleteEmbed
+        .setAuthor(`User Delete A Message`)
+        .setDescription(`ID: ${message.id} | In: ${message.channel}\nUser: ${message.author} \`${message.author.tag} , ${message.author.id}\``)
+        .addField(`_ _`, `Message Content: \`${message.content}\``)
+        deleteChannel.send(deleteEmbed);
     } catch (error) {
-        return console.log(`There was an error sending a message to deleteChannel in messageDelete`, error);
+        return console.log(`There was an error sending a message to deleteChannel in staffLog`, error);
     }
 	
 });
@@ -465,7 +573,7 @@ client.on('messageDelete', async message => {
 
 client.on('messageUpdate', async (oldMessage, newMessage) => {
 
-    const editChannel = client.channels.cache.get('744966289310744668')
+    const editChannel = client.channels.cache.get(staffLogChannel)
     const rules = '735537345981579457'
     const getRoles = '744536926757060683'
     
@@ -510,13 +618,42 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
 
     let guildId = newMessage.guild.id;
     // ignore logs from other servers until i set them up
-    if (guildId !== `731220209511432334`) return
+    if (guildId !== guildID) return
     
     const user = oldMessage.guild.members.cache.find(u => u.user === newMessage.author)
     if (user.bot) return;
 
-    editChannel.send(`${newMessage.author} edited a message in \`${newMessage.channel.name}\`: \nOld Message\: \`${oldMessage.content}\` \n\nNew Message\: \`${newMessage.content}\``)
+    const editEmbed = new Discord.MessageEmbed()
+    .setColor('YELLOW')
+    .setAuthor('User Edited a Message')
+    .setDescription(`Message ID: ${newMessage.id} in ${newMessage.channel} \nUser: ${newMessage.author} \`${newMessage.author.tag}, ${newMessage.author.id}\``)
+    .addFields({name: `Old Message:`, value: `${oldMessage.content}`},{name: `New Message`, value: `${newMessage.content}`})
 
+    editChannel.send(editEmbed)
+
+});
+
+client.on("guildMemberAdd", member => {
+    const staffLog = client.channels.cache.get(staffLogChannel)
+    let dateJoined = ms(member.user.createdTimestamp)
+    const memberAddEmbed = new Discord.MessageEmbed()
+    .setColor(`GREEN`)
+    //TODO add green check to author
+    .setAuthor(`User Joined The Server`)
+    .setDescription(`User: ${member} | \`${member.user.tag}, ${member.id}\` `)
+    .addField(`User Joined Discord:`, `${dateJoined}`)
+    staffLog.send(memberAddEmbed)
+});
+
+client.on("guildMemberRemove", member => {
+    const staffLog = client.channels.cache.get(staffLogChannel)
+    const timeLeft = ms(Date.now() - member.joinedAt)
+    const memberRemoveEmbed = new Discord.MessageEmbed()
+    .setColor(`RED`)
+    .setAuthor(`User Left The Server`)
+    .setDescription(`User: ${member} | \`${member.user.tag}, ${member.id}\` `)
+    .addField(`User Left The Server After:`, `${timeLeft}`)
+    staffLog.send(memberRemoveEmbed)
 });
 
 

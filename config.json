@@ -1,20 +1,25 @@
 {
     "token": "NzM1OTc1MTExNTU5MDg2MjMw.XxoKrg.blNQRAwWlkqugbgxvXVUk6Mqlfk",
     "prefix": "!",
+    "guildID": "731220209511432334",
     "staffLogChannel": "743831588328046623",
+    "rulesMessageID": "746136542560387253",
     "strengthsMessageID": "750354557313220709",
     "interestMessageID": "",
     "lfgVoteChannel": "735951916621627472",
+    "lfgHubParentID": "746367771679653990",
+    "contentHubParentID": "746367857134272532",
     "contentVoteChannel": "735951123898302614",
     "rolesChannel": "746369491918651403",
+    "rulesChannel": "735537345981579457",
     "strengthsObj": {
-        "🧩": "Art & Design 🧩",
+        "🧩": "Art and Design 🧩",
         "👔": "Business 👔",
         "💻": "Computer Science 💻",
         "🖥️": "Data Science 🖥️",
         "🦺": "Engineering 🦺",
-        "📌": "Education & Teaching 📌",
-        "💉": "Health & Medicine 💉",
+        "📌": "Education and Teaching 📌",
+        "💉": "Health and Medicine 💉",
         "🔎": "Humanities 🔎",
         "⌨️": "Programming ⌨️",
         "🗿": "Personal Development 🗿",
@@ -23,20 +28,19 @@
         "💡": "Social Sciences 💡"
     },
     "interestsObj": {
-        "🧩": "Art & Design",
+        "🧩": "Art and Design",
         "👔": "Business",
         "💻": "Computer Science",
         "🖥️": "Data Science",
         "🦺": "Engineering",
-        "📌": "Education & Teaching",
-        "💉": "Health & Medicine",
+        "📌": "Education and Teaching",
+        "💉": "Health and Medicine",
         "🔎": "Humanities",
         "⌨️": "Programming",
         "🗿": "Personal Development",
         "📐": "Mathematics",
         "🔬": "Sciences",
         "💡": "Social Sciences"
-    },
-    "rulesChannel": "735537345981579457"
+    }
 }
 
