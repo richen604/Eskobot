@@ -5,7 +5,7 @@ module.exports = {
     description: 'posts an embed for interests roles, Admin Only',
     staffRoles: ["Exec. Director"],
     guildOnly: "true",
-    execute(client, message, args, punishmentLog, rolesChannel, strengthsObj) {
+    execute(client, message, args, punishmentLog, rolesChannel, interestsObj) {
         if (message.channel.id !== rolesChannel) return
         message.delete().catch(O_o => {});
         const interestsEmbed = new Discord.MessageEmbed()

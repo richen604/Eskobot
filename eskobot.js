@@ -351,7 +351,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
     
     
     // RULES FUNCTION
-    //TODO Rules message id in config.json
     if (reaction.message.id === rulesMessageID && reaction.emoji.name === '📚'); {
         // Find role Pupil and add it to the user
         let role = reaction.message.guild.roles.cache.find(role => role.name === 'Pupil');

@@ -1,10 +1,10 @@
 {
-    "name": "eskobot12",
+    "name": "eskobot",
     "version": "1.0.0",
     "description": "",
     "main": "eskobot.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "start": "node eskobot.js"
     },
     "keywords": [],
     "author": "",
