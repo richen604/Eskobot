@@ -81,7 +81,7 @@ const cooldowns = new Discord.Collection();
 //TODO create a reaction debug that reacts to rulesMessageID
 client.on('ready', async () => {
     console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
-    client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
+    client.user.setActivity(`Message me for help!`);
     //TODO find a way to do a quick react/unreact feature to debug listeners 
 });
 
@@ -90,12 +90,12 @@ punishmentLog.sync();
 
 client.on('guildCreate', guild => {
     console.log(`New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
-    client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
+    client.user.setActivity(`Message me for help!`);
 });
 
 client.on('guildDelete', guild => {
     console.log(`I have been removed from: ${guild.name} (id: ${guild.id})`);
-    client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
+    client.user.setActivity(`Message me for help!`);
 });
 
 
