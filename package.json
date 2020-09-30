@@ -2,6 +2,10 @@
     "name": "eskobot",
     "version": "1.0.0",
     "description": "",
+    "engines": {
+        "node": "14.10.0",
+        "npm": "6.14.7"
+    },
     "main": "eskobot.js",
     "scripts": {
         "start": "node eskobot.js"
