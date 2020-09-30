@@ -419,7 +419,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
         //Changes lfgCount relative to how many channels exist
         const getLfgHub = client.channels.cache.filter(c => c.parentID === lfgHubParentID)
         let arr = getLfgHub.keyArray()
-        if (arr.length > 1) {
+        if (arr.length > 2) {
             lfgCount = arr.length * 20
         }
         console.log(lfgCount)
