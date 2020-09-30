@@ -415,13 +415,16 @@ client.on('messageReactionAdd', async (reaction, user) => {
     //LFG Vote Function
     if (reaction.message.channel.id === lfgVoteChannel){
 
-        let lfgCount = 3
+        
         
         //Changes lfgCount relative to how many channels exist
         const getLfgHub = client.channels.cache.filter(c => c.parentID === lfgHubParentID)
         let arr = getLfgHub.keyArray()
+        console.log(get)
         if (arr.length > 2) {
-            lfgCount = arr.length * 20
+            var lfgCount = arr.length * 20
+        } else {
+            var lfgCount = 3
         }
         console.log(lfgCount)
 
@@ -438,6 +441,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
         
         const findCategoryContent = client.channels.cache.find(c => c.name === categoryName)
         const findCategoryLfg = client.channels.cache.find(c => c.name === categoryName)
+        console.log(findCategoryContent)
+        console.log(findCategoryLfg)
 
 
         //check if message.content / channel.name exist in both contentHub or lfgHub
