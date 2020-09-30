@@ -9,7 +9,7 @@ module.exports = {
         if (message.channel.id !== rolesChannel) return
         message.delete().catch(O_o => {});
         const interestsEmbed = new Discord.MessageEmbed()
-        .setDescription(`---------------------**React to this message for an Interests Role!**--------------------- \nLimited to 1 role, if the correct role isn't showing remove all reactions and select again.`)
+        .setDescription(`---------------------**React to this message for an Interests Role!**--------------------- \nMultiple Roles available, show people what you want to learn!`)
         for (const key in interestsObj) {
             interestsEmbed.addFields( {
                 name: `_ _`, value: `${interestsObj[key]}`, inline: true

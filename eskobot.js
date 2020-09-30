@@ -399,6 +399,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 
     }
 
+    //INTERESTS ROLE ADD FUNCTION
     if (reaction.message.id === interestsMessageID){
 
         //TODO if user has a strengthRole and applies an interestRole returns (vise versa)
