@@ -5,7 +5,6 @@ _ _
 You can get roles here to help you show others where your strengths are! Heres how it works:
 _ _
 First, select a **Strength** that will separate you in the right column. This will let others know what your main interest is! It may be difficult to pick favourites, so you are welcome to change it at any time. We encourage you to explore more fields to find your strengths!
-`Note:` Strengths roles are required before selecting interests.
 
 (!strengths command with embed showing the following)
 - Art & Design 🧩 \:jigsaw:
