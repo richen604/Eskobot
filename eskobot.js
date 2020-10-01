@@ -615,14 +615,25 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
 		}
     }
 
-    if (newMessage.author.bot || oldMessage.author.bot) return
+    try {
+        if (newMessage.author.bot || oldMessage.author.bot) return
+    } catch (error) {
+        console.log(`Message Edit Listener Error: Checking if message editor is a bot returned an error, \n ${error}`)
+    }
+    
 
     let guildId = newMessage.guild.id;
     // ignore logs from other servers until i set them up
     if (guildId !== guildID) return
     
     const user = oldMessage.guild.members.cache.find(u => u.user === newMessage.author)
-    if (user.bot) return;
+
+    try {
+        if (user.bot) return;
+    } catch (error) {
+        console.log(`Message Edit Listener Error: checking if user is bot returned an error, \n ${error}`)
+    }
+   
 
     const editEmbed = new Discord.MessageEmbed()
     .setColor('YELLOW')
