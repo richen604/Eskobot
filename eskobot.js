@@ -420,14 +420,12 @@ client.on('messageReactionAdd', async (reaction, user) => {
         //Changes lfgCount relative to how many channels exist
         const getLfgHub = client.channels.cache.filter(c => c.parentID === lfgHubParentID)
         let arr = getLfgHub.keyArray()
-        console.log(get)
-        if (arr.length > 2) {
-            var lfgCount = arr.length * 20
-        } else {
-            var lfgCount = 3
+        console.log(`arr length is ${arr.length}`)
+        let lfgCount = 3
+        if (arr.length > 1) {
+            lfgCount = arr.length * 10
         }
-        console.log(lfgCount)
-
+        console.log(`lfg count is ${lfgCount}`)
         //finds only the channels that are over lfg count
         let reactionCount = reaction.message.reactions.cache.find(reaction => reaction.count >= lfgCount)
         if (!reactionCount) return // ignores reacts that aren't greater or equal to the first lfgCount
@@ -441,8 +439,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
         
         const findCategoryContent = client.channels.cache.find(c => c.name === categoryName)
         const findCategoryLfg = client.channels.cache.find(c => c.name === categoryName)
-        console.log(findCategoryContent)
-        console.log(findCategoryLfg)
 
 
         //check if message.content / channel.name exist in both contentHub or lfgHub
@@ -661,5 +657,8 @@ client.on("guildMemberRemove", member => {
     staffLog.send(memberRemoveEmbed)
 });
 
+//HEROKU LIVE
+//client.login(process.env.BOT_TOKEN);
 
-client.login(process.env.BOT_TOKEN);
+//LOCAL TESTING
+client.login(token)

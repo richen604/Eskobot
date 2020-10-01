@@ -9,7 +9,7 @@ module.exports = {
         if (message.channel.id !== `735951916621627472`) return message.reply('This command is limited to the lfgVote channel')
         if ((typeof args !== 'array') && (typeof args[0] !== 'undefined')) { return message.reply('Please provide an array of categories')};
         
-        const links = ["Art & Design 🧩","Business 👔", "Computer Science 💻", "Data Science 🖥️", "Engineering 🦺", "Education & Teaching 📌",
+        const links = ["Art and Design 🧩","Business 👔", "Computer Science 💻", "Data Science 🖥️", "Engineering 🦺", "Education & Teaching 📌",
         "Health & Medicine 💉", "Humanities 🔎","Programming ⌨️","Personal Development 🗿","Mathematics 📐","Sciences 🔬",
         "Social Sciences 💡"] //change to array here for easy posting, format [Category, Category.....)
 
