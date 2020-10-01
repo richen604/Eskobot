@@ -5,13 +5,11 @@ ISNT UPDATE WITH DISCORD
 _ _
 **Welcome to Kallant!**
 _ _
-(div image)
 _ _
 Online courses are very common theses days, but once you get knowledge what do you do with it? At **Kallant** we give you the tools and the space to explore the possibilities with your educational interests. Our *main focus* is to connect you with other people that work with your strengths in order to build captivating projects that outline knowledge you have, or knowledge you are learning. With our guidance, we hope to achieve this, and bring you gratifying relationships with your future peers.
 _ _
 Heres a brief rundown of the features that are part of the server so far: *These features are subject to change*
 _ _
-(div image)
 _ _
 `Modmail` - Our Ticket System
 If you have any complaints, or issues regarding other members of the server. Please feel free to send a message to @Esko detailing your situation. Staff are focused on handling these tickets as soon as possible, so please use Modmail rather than messaging staff.
@@ -29,7 +27,5 @@ Questions like these and more can be asked and answered here.
 _ _
 Want more features? No matter how big or small, feel free to post them in #suggestions
 _ _
-(div image)
-_ _
-**IMAGE**
+
 

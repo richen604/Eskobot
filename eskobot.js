@@ -657,7 +657,7 @@ client.on("guildMemberRemove", member => {
     staffLog.send(memberRemoveEmbed)
 });
 
-//HEROKU LIVE
+//HEROKU LIVE?
 //client.login(process.env.BOT_TOKEN);
 
 //LOCAL TESTING
