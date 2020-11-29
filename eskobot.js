@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /* eslint-disable no-unused-vars */
 /* eslint-disable brace-style */
 // Load up the discord.js library
@@ -9,6 +10,7 @@ const {
     lfgVoteChannel, contentVoteChannel, rolesChannel, rulesChannel, strengthsObj, interestsObj, rulesMessageID, guildID,
 } = require('./config.json');
 const Sequelize = require('sequelize');
+const modmail = require('./functions/modmail');
 const AntiSpam = require('discord-anti-spam');
 const antiSpam = new AntiSpam({
 	warnThreshold: 3, // Amount of messages sent in a row that will cause a warning.
@@ -119,6 +121,14 @@ client.on('message', async message => {
     // ignore bots/self
     if (message.author.bot) return;
 
+    //init some consts for the rest of the event handler
+    const messageUser = message.author;
+    //const messageMember = message.guild.members.resolve(messageUser.id);
+    const messageMember = message.member;
+    //const messageGuild = message.guild.id;
+    const botGuilds = client.guilds.cache.map(guild => guild.id);
+
+
     //inits antiSpam package
     antiSpam.message(message);
 
@@ -130,28 +140,44 @@ client.on('message', async message => {
     const command = client.commands.get(commandName) ||
         client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-    // Server only command check
-    
+    // If message is not in guild
     //MODMAIL FUNCTION
     if (!command && message.channel.type !== 'text') {
         // TODO Insert Modmail logic here
 
-        const guild = client.guilds.cache.get('731220209511432334'),
-            USER_ID = message.author.id,
-            USER = guild.member(USER_ID);
-        if (!guild.member(USER_ID)) return;
+        const memberGuildsArr = [];
+        const guild = client.guilds.cache.get('781964639117901845');
+
+        //builds an array of guilds the user is a member in
+        botGuilds.forEach(guildId => {
+            const guild = client.guilds.cache.get(guildId);
+            if (guild.members.fetch(messageUser.id)) {
+                memberGuildsArr.push(guild);
+            } 
+        });
+
+        //If memberGuildsArr is longer than 1 we have to ask the user which server they are messaging
+        //checking if IS EQUAL to one for testing
+        if(memberGuildsArr.length === 1) {
+            modmail.ModmailGuildPrompt(message, messageUser, memberGuildsArr);
+        } return
+        //Call a function to prompt user for feedback via an Embed Message to React to
+
+
+        const USER = guild.member(messageUser.id);
+        if (!guild.member(messageUser.id)) return;
         const member = client.users.resolve(USER);
 
         if (message.author.bot) return;
 
-        const chan = guild.channels.cache.find(c => c.name === USER_ID);
+        const chan = guild.channels.cache.find(c => c.name === messageUser.id);
 
         //init User message Embed for multiple uses
         const userEmbed = new Discord.MessageEmbed()
         .setColor('#6A0DAD')
         //.setTitle(`User Message`)
         //.setAuthor(`${USER}, ID: ${USER_ID}`)
-        .setDescription(`${USER}, ID: ${USER_ID}`)
+        .setDescription(`${USER}, ID: ${messageUser.id}`)
         .setThumbnail(member.avatarURL())
         .addField('User Message', message)
         .setTimestamp();
@@ -167,7 +193,7 @@ client.on('message', async message => {
             return;
         } else {
             //creates the channel with userid as the name
-            const ticket = await guild.channels.create(USER_ID, {
+            const ticket = await guild.channels.create(messageUser.id, {
                 type: 'text', 
                 parent: '747457097762865203', // id of ticket channel category
             })
@@ -199,7 +225,7 @@ client.on('message', async message => {
             // New embed with User Log Data
             try {
                     // arg will be name or id of user 
-                    const tagList = await punishmentLog.findAll({ where: { userid: USER_ID } });
+                    const tagList = await punishmentLog.findAll({ where: { userid: messageUser.id } });
 
                     const exampleEmbed = new Discord.MessageEmbed()
                     .setColor('#6A0DAD')
@@ -350,6 +376,9 @@ client.on('messageReactionAdd', async (reaction, user) => {
 		}
     }
     
+    //if reaction is not in the server return
+    if(!reaction.message.guild) return
+
     const guildId = reaction.message.guild.id;
     // ignore other servers until i set them up
     if (guildId !== '731220209511432334') return;
