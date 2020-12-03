@@ -11,9 +11,10 @@ const {
 const Sequelize = require('sequelize');
 const modmail = require('./functions/modmail');
 const checks = require('./functions/checks');
-const antiSpam = require('./functions/antispam');
-const guildLogsInit = require('./functions/guildLogs'); 
+const antiSpamFunc = require('./functions/antispam');
+const guildLogs = require('./functions/guildLogs'); 
 
+const antiSpam = antiSpamFunc.antispamInit();
 
 // MASTER TODO LIST
 //TODO Refactor to allow for multiple servers
@@ -46,7 +47,7 @@ INIT COMMAND TODOS
 const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
 // sequelize initialization for punishmentLog and ticketLog
-const { punishmentLog, ticketLog } = guildLogsInit();
+const { punishmentLog, ticketLog } = guildLogs.guildLogsInit();
 
 // Grabs commands and Kallant folder files to import into an array
 client.commands = new Discord.Collection();
