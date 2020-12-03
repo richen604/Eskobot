@@ -1,7 +1,6 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-unused-vars */
 /* eslint-disable brace-style */
-// Load up the discord.js library
 const fs = require('fs');
 const ms = require('ms');
 const Discord = require('discord.js');
@@ -11,28 +10,10 @@ const {
 } = require('./config.json');
 const Sequelize = require('sequelize');
 const modmail = require('./functions/modmail');
-const AntiSpam = require('discord-anti-spam');
-const antiSpam = new AntiSpam({
-	warnThreshold: 3, // Amount of messages sent in a row that will cause a warning.
-	kickThreshold: 7, // Amount of messages sent in a row that will cause a ban.
-	banThreshold: 7, // Amount of messages sent in a row that will cause a ban.
-	maxInterval: 2000, // Amount of time (in milliseconds) in which messages are considered spam.
-	warnMessage: '{@user}, Please stop spamming.', // Message that will be sent in chat upon warning a user.
-	kickMessage: '**{user_tag}** has been kicked for spamming.', // Message that will be sent in chat upon kicking a user.
-	banMessage: '**{user_tag}** has been banned for spamming.', // Message that will be sent in chat upon banning a user.
-	maxDuplicatesWarning: 7, // Amount of duplicate messages that trigger a warning.
-	maxDuplicatesKick: 10, // Amount of duplicate messages that trigger a warning.
-	maxDuplicatesBan: 12, // Amount of duplicate messages that trigger a warning.
-	exemptPermissions: [ 'ADMINISTRATOR', 'KICK_MEMBERS', 'BAN_MEMBERS'], // Bypass users with any of these permissions.
-	ignoreBots: false, // Ignore bot messages.
-	verbose: true, // Extended Logs from module.
-	ignoredUsers: [], // Array of User IDs that get ignored.
-	// And many more options... See the documentation.
-});
+const checks = require('./functions/checks');
+const antiSpam = require('./functions/antispam');
+const guildLogsInit = require('./functions/guildLogs'); 
 
-/*
- DISCORD.JS VERSION 12 CODE
-*/
 
 // MASTER TODO LIST
 //TODO Refactor to allow for multiple servers
@@ -40,60 +21,56 @@ const antiSpam = new AntiSpam({
 //TODO Refactor Modmail to allow for multiple servers
 //TODO Refactor Role Message React feature to allow for multiple servers
 //TODO Refactor to migrate from needing a config.json. or to be able to edit config.json within server (preferred)
-//TODO Set up an options command for init command function
+
+//TODO init command function
+/* 
+REQUIREMENT REFACTORING BEFORE INIT COMMAND WILL WORK
+- function for staff roles in modules
+- config folder for each server
+- function for handling default config
+
+
+INIT COMMAND TODOS
+- function to create config file (during init)
+- embeds to select options
+- message listeners to input data
+- input staff role names
+- select default settings or custom
+- custom settings requires supplying a json as an attachement to a message listener
+- create ticket channel if modmail was selected
+- select features on / off
+*/
+
 //TODO set up an init command to set up server functions like staff log and modmail ticket channels
 
 const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
-// sequelize initialization
-
-const sequelize = new Sequelize('database', 'user', 'password', {
-    host: 'localhost',
-    dialect: 'sqlite',
-    logging: false,
-    // SQLite only
-    storage: 'database.sqlite',
-});
-
-// Set up table and tags (TESTING)
-
-const punishmentLog = sequelize.define('punishmentLog', {
-    userid: Sequelize.STRING,
-    username: Sequelize.STRING,
-    punishment: Sequelize.STRING,
-    reason: Sequelize.STRING,
-    punishmentTime: Sequelize.INTEGER,
-    staffName: Sequelize.STRING,
-    count: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
-        allowNull: false,
-    },
-});
-
+// sequelize initialization for punishmentLog and ticketLog
+const { punishmentLog, ticketLog } = guildLogsInit();
 
 // Grabs commands and Kallant folder files to import into an array
 client.commands = new Discord.Collection();
-client.Kallant = new Discord.Collection();
+client.guildConfigs = new Discord.Collection();
 
 // Cooldowns initialization for later
 const cooldowns = new Discord.Collection();
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-const KallantFiles = fs.readdirSync('./Kallant').filter(file => file.endsWith('.js'));
+const guildFiles = fs.readdirSync('./configs').filter(file => file.endsWith('.json'));
 
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     client.commands.set(command.name, command);
 }
 
-for (const file of KallantFiles) {
-    const Kallant = require(`./Kallant/${file}`);
-    client.Kallant.set(Kallant.name, Kallant);
+for (const file of guildFiles) {
+    const singleGuildConfig = require(`./configs/${file}`);
+    client.guildConfigs.set(singleGuildConfig.guild, singleGuildConfig);
 }
 
-// sync Sequelize tags table
+// sync Sequelize tables
 punishmentLog.sync();
+ticketLog.sync();
 
 // Bot start
 client.on('ready', async () => {
@@ -126,8 +103,8 @@ client.on('message', async message => {
     //const messageMember = message.guild.members.resolve(messageUser.id);
     const messageMember = message.member;
     //const messageGuild = message.guild.id;
-    const botGuilds = client.guilds.cache.map(guild => guild.id);
-
+    const botGuildsId = client.guilds.cache.map(guild => guild.id);
+    const botGuilds = client.guilds.cache.map(guild => guild);
 
     //inits antiSpam package
     antiSpam.message(message);
@@ -143,51 +120,54 @@ client.on('message', async message => {
     // If message is not in guild
     //MODMAIL FUNCTION
     if (!command && message.channel.type !== 'text') {
-        // TODO Insert Modmail logic here
 
-        const memberGuildsArr = [];
-        const guild = client.guilds.cache.get('781964639117901845');
+        let memberGuildsArr = [];
 
         //builds an array of guilds the user is a member in
-        botGuilds.forEach(guildId => {
+        botGuildsId.forEach(guildId => {
             const guild = client.guilds.cache.get(guildId);
             if (guild.members.fetch(messageUser.id)) {
                 memberGuildsArr.push(guild);
             } 
         });
 
-        //If memberGuildsArr is longer than 1 we have to ask the user which server they are messaging
-        //checking if IS EQUAL to one for testing
-        if(memberGuildsArr.length === 1) {
-            modmail.ModmailGuildPrompt(message, messageUser, memberGuildsArr);
-        } return
-        //Call a function to prompt user for feedback via an Embed Message to React to
+        let guild = memberGuildsArr[0];
+        //check for modmail off in guildConfig
+        const currentGuildConfig = client.guildConfigs.find(config => config.guild === memberGuildsArr[0].id);
+        checks.featureConfigCheck(client, message, 'Modmail', currentGuildConfig); //returns boolean
 
+        //Call a function to prompt user for feedback via an Embed Message to React to only if there are multiple guilds the user is in
+        let selectedGuild = undefined;
+        if(memberGuildsArr.length > 1) {
+            selectedGuild = modmail.ModmailGuildPrompt(message, messageUser, memberGuildsArr);
+            memberGuildsArr = null;
+            //return if user did not select any from ModmailGuildPrompt
+            if(selectedGuild === null) return;
+        }
 
-        const USER = guild.member(messageUser.id);
+        //use selected guild if guild was selected
+        if(!selectedGuild === undefined) guild = selectedGuild;
+
         if (!guild.member(messageUser.id)) return;
-        const member = client.users.resolve(USER);
 
-        if (message.author.bot) return;
-
-        const chan = guild.channels.cache.find(c => c.name === messageUser.id);
+        const UserTicketChannel = guild.channels.cache.find(c => c.name === messageUser.id);
 
         //init User message Embed for multiple uses
         const userEmbed = new Discord.MessageEmbed()
         .setColor('#6A0DAD')
         //.setTitle(`User Message`)
         //.setAuthor(`${USER}, ID: ${USER_ID}`)
-        .setDescription(`${USER}, ID: ${messageUser.id}`)
-        .setThumbnail(member.avatarURL())
+        .setDescription(`${messageMember}, ID: ${messageMember.id}`)
+        .setThumbnail(messageUser.avatarURL())
         .addField('User Message', message)
         .setTimestamp();
         
 
         // Channel exists check
-        if (chan) {
+        if (UserTicketChannel) {
             // send message to open ticket
-            if (message.author.id === chan.name) {
-                await chan.send(userEmbed)
+            if (message.author.id === UserTicketChannel.name) {
+                await UserTicketChannel.send(userEmbed)
                 .catch(err => console.log('There was a error with sending message to an open ticket in modmail', err));
             }
             return;
@@ -195,12 +175,11 @@ client.on('message', async message => {
             //creates the channel with userid as the name
             const ticket = await guild.channels.create(messageUser.id, {
                 type: 'text', 
-                parent: '747457097762865203', // id of ticket channel category
+                parent: '747457097762865203', // id of ticket channel category //TODO ticket parent id in bot init function
             })
             .catch(err => console.log('There was an error with making channel for modmail', err));
 
             //sends first messages to channel
-            //TODO REFACTOR add modmail feature to module 
             // TODO create a small embed for user messages
             // BUG antispam won't listen to bot messages => modmail spam will be an issue
 
@@ -217,7 +196,7 @@ client.on('message', async message => {
                     //.setThumbnail(member.avatarURL())
                     .setFooter('Note: Misuse of Modmail may lead to punishment.')
                     .setTimestamp();
-                    await member.send(modmailEmbed);
+                    await messageUser.send(modmailEmbed);
             } catch (e) {
                 console.log('Modmail: Error sending initial DM embed', e);
             }
@@ -225,24 +204,24 @@ client.on('message', async message => {
             // New embed with User Log Data
             try {
                     // arg will be name or id of user 
-                    const tagList = await punishmentLog.findAll({ where: { userid: messageUser.id } });
+                    const tagList = await punishmentLog.findAll({ where: { userid: messageMember.id } });
 
-                    const exampleEmbed = new Discord.MessageEmbed()
+                    const userlogEmbed = new Discord.MessageEmbed()
                     .setColor('#6A0DAD')
                     .setTitle('Staff Log')
-                    .setDescription(`User history for ${member}, ID: ${member.id}`)
-                    .setThumbnail(member.avatarURL());
+                    .setDescription(`User history for ${messageUser}, ID: ${messageUser.id}`)
+                    .setThumbnail(messageUser.avatarURL());
                     if (tagList.length > 0) {
                         tagList.forEach(t => {
-                        exampleEmbed.addFields(
+                        userlogEmbed.addFields(
                             { name: `Log ID: ${t.id} | ${t.punishment} for ${t.reason}`, value: `Done by Staff: ${t.staffName}` },
                         );});
                     } else if (tagList.length === 0) {
-                        exampleEmbed.addField('Userlog', 'This user has no punishment history');
+                        userlogEmbed.addField('Userlog', 'This user has no punishment history');
                     } else {
                         console.log('error with userlog function: tagList');
                     }
-                    await channel.send(exampleEmbed);
+                    await channel.send(userlogEmbed);
             } catch (e) {
                 console.log('There was an issue with the userlog Modmail function', e);
             }
@@ -261,7 +240,10 @@ client.on('message', async message => {
         return;
     }
 
+    //Returning if theres no command or message isn't prefix
     if (!command && !message.content.startsWith(prefix)) return;
+
+    //START COMMAND HANDLING LOGIC
 
     if (command.staffRoles) {
         if (!message.member.roles.cache.some(r => command.staffRoles.includes(r.name))) {
@@ -319,6 +301,7 @@ client.on('message', async message => {
                 if (!reason) reason = 'No reason provided';
 
                 const log = await punishmentLog.create({
+                    guildid: message.guild.id,
                     userid: member.id,
                     username: `${member}`,        
                     punishment: command.name,
@@ -377,7 +360,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
     }
     
     //if reaction is not in the server return
-    if(!reaction.message.guild) return
+    if(!reaction.message.guild) return;
 
     const guildId = reaction.message.guild.id;
     // ignore other servers until i set them up
@@ -615,7 +598,6 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
     const getRoles = '744536926757060683';
 
     
-    // TODO add staff chats to the list of ignored channels
     if (newMessage.channel.id === (rules || getRoles)) return;
     //if (!oldMessage.guild.id === '731220209511432334') return;
     if (!oldMessage.guild || !newMessage.guild) return;

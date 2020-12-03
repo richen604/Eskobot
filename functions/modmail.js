@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 
 const ModmailGuildPrompt = async function(message, messageUser, memberGuildsArr) {
+
+    //TODO should probably add a cooldown feature for the function to prevent spamming the bot
     //Create an array of objects with numerical emoji keys to relate to each guild
     const reactionArr = ['1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣', '🔟'];
     const memberGuildsArrReacts = [];
@@ -40,7 +42,7 @@ const ModmailGuildPrompt = async function(message, messageUser, memberGuildsArr)
     const filter = (reaction, user) => {
         return reactionArr.includes(reaction.emoji.name) && user.id === messageUser.id;
     };
-    embedMessage.awaitReactions(filter, { time: 10000, errors: ['time'] })
+    embedMessage.awaitReactions(filter, { time: 5000, errors: ['time'] })
 	.catch(collected => {
 
         //Grab selected server to return to bot

@@ -1,0 +1,14 @@
+{
+    "guild": "781964639117901845",
+    "someValue": 18,
+    "features": {
+        "Modmail": true,
+        "PunishLog": true
+    },
+    "commands": [],
+    "channels": {
+        "ticketParentId": "string",
+        "staffLogId": "string",
+        "generalId": "string"
+    }
+}
