@@ -2,7 +2,7 @@
     "guild": "781964639117901845",
     "someValue": 18,
     "features": {
-        "Modmail": true,
+        "Modmail": false,
         "PunishLog": true
     },
     "commands": [],

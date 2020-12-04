@@ -8,7 +8,6 @@ const {
     prefix, token, staffLogChannel, strengthsMessageID, interestsMessageID, lfgHubParentID, contentHubParentID,
     lfgVoteChannel, contentVoteChannel, rolesChannel, rulesChannel, strengthsObj, interestsObj, rulesMessageID, guildID,
 } = require('./config.json');
-const Sequelize = require('sequelize');
 const modmail = require('./functions/modmail');
 const checks = require('./functions/checks');
 const antiSpamFunc = require('./functions/antispam');
@@ -122,9 +121,14 @@ client.on('message', async message => {
     //MODMAIL FUNCTION
     if (!command && message.channel.type !== 'text') {
 
-        let memberGuildsArr = [];
+        /*
+        To handle Modmail features, the bot does not know if the user message is from a member of any server.
+        On top of that, if the member is in multiple servers we need to give the member options.
+        Handling those options to check if the feature is true in the servers guildConfig
+        */
 
         //builds an array of guilds the user is a member in
+        let memberGuildsArr = [];
         botGuildsId.forEach(guildId => {
             const guild = client.guilds.cache.get(guildId);
             if (guild.members.fetch(messageUser.id)) {
@@ -132,24 +136,30 @@ client.on('message', async message => {
             } 
         });
 
-        let guild = memberGuildsArr[0];
-        //check for modmail off in guildConfig
-        const currentGuildConfig = client.guildConfigs.find(config => config.guild === memberGuildsArr[0].id);
-        checks.featureConfigCheck(client, message, 'Modmail', currentGuildConfig); //returns boolean
+        const newguild = memberGuildsArr[0];
+        memberGuildsArr.push(newguild);
 
         //Call a function to prompt user for feedback via an Embed Message to React to only if there are multiple guilds the user is in
-        let selectedGuild = undefined;
+        let guild = undefined;
         if(memberGuildsArr.length > 1) {
-            selectedGuild = modmail.ModmailGuildPrompt(message, messageUser, memberGuildsArr);
-            memberGuildsArr = null;
+            //gives select prompt
+            guild = await modmail.ModmailGuildPrompt(message, messageUser, memberGuildsArr);
             //return if user did not select any from ModmailGuildPrompt
-            if(selectedGuild === null) return;
+            if(!guild) return;
         }
 
-        //use selected guild if guild was selected
-        if(!selectedGuild === undefined) guild = selectedGuild;
+        if(memberGuildsArr.length === 1) {
+            //grabs first guild that member is in
+            guild = memberGuildsArr[0];
+        }
 
-        if (!guild.member(messageUser.id)) return;
+        //check for modmail off in guildConfig
+        if(!checks.featureConfigCheck(client, message, guild, 'Modmail')) return; //returns boolean
+
+        //we don't need memberGuildArr anymore
+        memberGuildsArr = undefined;
+
+        if(!guild) return;
 
         const UserTicketChannel = guild.channels.cache.find(c => c.name === messageUser.id);
 
