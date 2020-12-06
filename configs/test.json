@@ -1,8 +1,8 @@
 {
     "guild": "781964639117901845",
-    "someValue": 18,
+    "ticketParentId": "785193151953895445",
     "features": {
-        "Modmail": false,
+        "Modmail": true,
         "PunishLog": true
     },
     "commands": [],

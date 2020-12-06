@@ -100,11 +100,13 @@ client.on('message', async message => {
 
     //init some consts for the rest of the event handler
     const messageUser = message.author;
-    //const messageMember = message.guild.members.resolve(messageUser.id);
-    const messageMember = message.member;
-    //const messageGuild = message.guild.id;
+    let messageMember = undefined;
+    let messageGuild = undefined;
+    if(message.guild) {
+        messageMember = await message.guild.members.fetch(messageUser.id);
+        messageGuild = message.guild.id;
+    }
     const botGuildsId = client.guilds.cache.map(guild => guild.id);
-    const botGuilds = client.guilds.cache.map(guild => guild);
 
     //inits antiSpam package
     antiSpam.message(message);
@@ -121,12 +123,6 @@ client.on('message', async message => {
     //MODMAIL FUNCTION
     if (!command && message.channel.type !== 'text') {
 
-        /*
-        To handle Modmail features, the bot does not know if the user message is from a member of any server.
-        On top of that, if the member is in multiple servers we need to give the member options.
-        Handling those options to check if the feature is true in the servers guildConfig
-        */
-
         //builds an array of guilds the user is a member in
         let memberGuildsArr = [];
         botGuildsId.forEach(guildId => {
@@ -136,112 +132,29 @@ client.on('message', async message => {
             } 
         });
 
-        const newguild = memberGuildsArr[0];
-        memberGuildsArr.push(newguild);
-
         //Call a function to prompt user for feedback via an Embed Message to React to only if there are multiple guilds the user is in
         let guild = undefined;
         if(memberGuildsArr.length > 1) {
-            //gives select prompt
             guild = await modmail.ModmailGuildPrompt(message, messageUser, memberGuildsArr);
-            //return if user did not select any from ModmailGuildPrompt
             if(!guild) return;
         }
-
+        //if only one guild just grabs first guild that member is in
         if(memberGuildsArr.length === 1) {
-            //grabs first guild that member is in
             guild = memberGuildsArr[0];
         }
 
         //check for modmail off in guildConfig
-        if(!checks.featureConfigCheck(client, message, guild, 'Modmail')) return; //returns boolean
+        if(!checks.featureConfigCheck(client, message, guild, 'Modmail')) return;
 
         //we don't need memberGuildArr anymore
         memberGuildsArr = undefined;
-
-        if(!guild) return;
-
-        const UserTicketChannel = guild.channels.cache.find(c => c.name === messageUser.id);
-
-        //init User message Embed for multiple uses
-        const userEmbed = new Discord.MessageEmbed()
-        .setColor('#6A0DAD')
-        //.setTitle(`User Message`)
-        //.setAuthor(`${USER}, ID: ${USER_ID}`)
-        .setDescription(`${messageMember}, ID: ${messageMember.id}`)
-        .setThumbnail(messageUser.avatarURL())
-        .addField('User Message', message)
-        .setTimestamp();
         
+        if(!guild) return;
+        //Handle channel checking and embed messages
+        await modmail.ChannelMessageHandler(client, message, guild, messageUser, punishmentLog);
+        return;
 
-        // Channel exists check
-        if (UserTicketChannel) {
-            // send message to open ticket
-            if (message.author.id === UserTicketChannel.name) {
-                await UserTicketChannel.send(userEmbed)
-                .catch(err => console.log('There was a error with sending message to an open ticket in modmail', err));
-            }
-            return;
-        } else {
-            //creates the channel with userid as the name
-            const ticket = await guild.channels.create(messageUser.id, {
-                type: 'text', 
-                parent: '747457097762865203', // id of ticket channel category //TODO ticket parent id in bot init function
-            })
-            .catch(err => console.log('There was an error with making channel for modmail', err));
-
-            //sends first messages to channel
-            // TODO create a small embed for user messages
-            // BUG antispam won't listen to bot messages => modmail spam will be an issue
-
-            const channel = client.channels.cache.get(ticket.id);
-           
-
-            //User DM with Modmail message
-            try {
-                const modmailEmbed = new Discord.MessageEmbed()
-                //TODO Change color and create .setThumbnail for bot pfp
-                    .setColor('#6A0DAD')
-                    .setTitle('Welcome to Modmail')
-                    .setDescription('We have sent your message to staff, expect a reply shortly. \nYou may continue to explain your issue here if needed.')
-                    //.setThumbnail(member.avatarURL())
-                    .setFooter('Note: Misuse of Modmail may lead to punishment.')
-                    .setTimestamp();
-                    await messageUser.send(modmailEmbed);
-            } catch (e) {
-                console.log('Modmail: Error sending initial DM embed', e);
-            }
-            
-            // New embed with User Log Data
-            try {
-                    // arg will be name or id of user 
-                    const tagList = await punishmentLog.findAll({ where: { userid: messageMember.id } });
-
-                    const userlogEmbed = new Discord.MessageEmbed()
-                    .setColor('#6A0DAD')
-                    .setTitle('Staff Log')
-                    .setDescription(`User history for ${messageUser}, ID: ${messageUser.id}`)
-                    .setThumbnail(messageUser.avatarURL());
-                    if (tagList.length > 0) {
-                        tagList.forEach(t => {
-                        userlogEmbed.addFields(
-                            { name: `Log ID: ${t.id} | ${t.punishment} for ${t.reason}`, value: `Done by Staff: ${t.staffName}` },
-                        );});
-                    } else if (tagList.length === 0) {
-                        userlogEmbed.addField('Userlog', 'This user has no punishment history');
-                    } else {
-                        console.log('error with userlog function: tagList');
-                    }
-                    await channel.send(userlogEmbed);
-            } catch (e) {
-                console.log('There was an issue with the userlog Modmail function', e);
-            }
-            await channel.send(userEmbed)
-            .catch(err => console.log('There was an error sending messages after creating channel in modmail', err));
-            return;
-        }
-
-    } else if (!command) { //INIT REACT FOR CONTENT VOTING
+    } else if (!command) { // INIT REACT FOR CONTENT VOTING 
         /*if (message.channel.id === contentVoteChannel){
             await message.react('👍')
         } else {

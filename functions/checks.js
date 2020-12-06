@@ -12,12 +12,10 @@ const featureConfigCheck = async function(client, message, guild, feature) {
         message.reply(`${guild.name} has chose not to have ${feature} in the server`);
         return false;
     }
-
-    message.reply(`${guild.name} has chose to have ${feature} in the server`);
     return true;
 };
 
 
 module.exports = {
     featureConfigCheck,
-}
+};

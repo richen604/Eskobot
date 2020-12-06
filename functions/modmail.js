@@ -1,5 +1,96 @@
 const Discord = require('discord.js');
 
+const userEmbedFunc = async function(messageUser, message) {
+    const userEmbed = new Discord.MessageEmbed()
+        .setColor('#6A0DAD')
+        .setDescription(`${messageUser}, ID: ${messageUser.id}`)
+        .setThumbnail(messageUser.avatarURL())
+        .addField('User Message', message)
+        .setTimestamp();
+    return userEmbed;
+};
+
+const ChannelMessageHandler = async function(client, message, guild, messageUser, punishmentLog) {
+
+    //check for ticket parent channel and ticket existing user ticket channel
+    //TODO add uuid's for a ticket id, allow for multiple tickets per user
+    const currentGuildConfig = await client.guildConfigs.get(guild.id);
+    if(!currentGuildConfig.ticketParentId) return message.reply(`${guild.name} has not set up init for Modmail, missing a channel category for tickets`);
+    const UserTicketChannel = guild.channels.cache.find(channel => channel.name.includes(messageUser.id) == true);
+
+    //init User message Embed for multiple uses
+    const userEmbed = await userEmbedFunc(messageUser, message);
+
+    // Channel exists check
+    if (UserTicketChannel) {
+        // send message to open ticket
+        await UserTicketChannel.send(userEmbed)
+        .catch(err => console.log('There was a error with sending message to an open ticket in modmail', err));
+        return;
+    }
+ else {
+        //creates the channel with userid as the name
+        const ticket = await guild.channels.create(`${messageUser.tag} ${messageUser.id}`, {
+            type: 'text', 
+            parent: currentGuildConfig.ticketParentId, // id of ticket channel category //TODO ticket parent id in bot init function
+        })
+        .catch(err => console.log('There was an error with making channel for modmail', err));
+
+        //sends first messages to channel
+        // BUG antispam won't listen to bot messages => modmail spam will be an issue
+
+        const channel = client.channels.cache.get(ticket.id);
+        
+
+        //User DM with Modmail message
+        try {
+            const modmailEmbed = new Discord.MessageEmbed()
+            //TODO Change color and create .setThumbnail for bot pfp
+                .setColor('#6A0DAD')
+                .setTitle('Welcome to Modmail')
+                .setDescription('We have sent your message to staff, expect a reply shortly. \nYou may continue to explain your issue here if needed.')
+                //.setThumbnail(member.avatarURL())
+                .setFooter('Note: Misuse of Modmail may lead to punishment.')
+                .setTimestamp();
+                await messageUser.send(modmailEmbed);
+        }
+ catch (e) {
+            console.log('Modmail: Error sending initial DM embed', e);
+        }
+        
+        // New embed with User Log Data
+        try {
+                // arg will be name or id of user 
+                const tagList = await punishmentLog.findAll({ where: { userid: messageUser.id } });
+
+                const userlogEmbed = new Discord.MessageEmbed()
+                .setColor('#6A0DAD')
+                .setTitle('Staff Log')
+                .setDescription(`User history for ${messageUser}, ID: ${messageUser.id}`)
+                .setThumbnail(messageUser.avatarURL());
+                if (tagList.length > 0) {
+                    tagList.forEach(t => {
+                    userlogEmbed.addFields(
+                        { name: `Log ID: ${t.id} | ${t.punishment} for ${t.reason}`, value: `Done by Staff: ${t.staffName}` },
+                    );
+});
+                }
+ else if (tagList.length === 0) {
+                    userlogEmbed.addField('Userlog', 'This user has no punishment history');
+                }
+ else {
+                    console.log('error with userlog function: tagList');
+                }
+                await channel.send(userlogEmbed);
+        }
+ catch (e) {
+            console.log('There was an issue with the userlog Modmail function', e);
+        }
+        await channel.send(userEmbed)
+        .catch(err => console.log('There was an error sending messages after creating channel in modmail', err));
+    }
+};
+
 const ModmailGuildPrompt = async function(message, messageUser, memberGuildsArr) {
 
     //TODO should probably add a cooldown feature for the function to prevent spamming the bot
@@ -58,4 +149,7 @@ const ModmailGuildPrompt = async function(message, messageUser, memberGuildsArr)
         
 };
 
-exports.ModmailGuildPrompt = ModmailGuildPrompt;
+module.exports = { 
+    ModmailGuildPrompt,
+    ChannelMessageHandler,
+};
