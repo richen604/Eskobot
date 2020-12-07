@@ -12,14 +12,8 @@ const guildLogsInit = function() {
 
     //punishment log definition
     const punishmentLog = sequelize.define('punishmentLog', {
-    guildid: {
-        type: Sequelize.STRING,
-        unique: true,
-    },
-    userid: {
-        type: Sequelize.STRING,
-        unique: true,
-    },
+    guildid: Sequelize.STRING,
+    userid: Sequelize.STRING,
     username: Sequelize.STRING,
     punishment: Sequelize.STRING,
     reason: Sequelize.STRING,
@@ -33,14 +27,8 @@ const guildLogsInit = function() {
     });
 
     const ticketLog = sequelize.define('ticketLog', {
-    guildid: {
-        type: Sequelize.STRING,
-        unique: true,
-    },
-    userid: {
-        type: Sequelize.STRING,
-        unique: true,
-    },
+    guildid: Sequelize.STRING,
+    userid: Sequelize.STRING,
     ticketReason: Sequelize.STRING,
     closeReason: Sequelize.STRING,
     });

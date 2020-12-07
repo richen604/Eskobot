@@ -9,6 +9,7 @@ const {
     lfgVoteChannel, contentVoteChannel, rolesChannel, rulesChannel, strengthsObj, interestsObj, rulesMessageID, guildID,
 } = require('./config.json');
 const modmail = require('./functions/modmail');
+const punishmentLogger = require('./functions/punishmentLog');
 const checks = require('./functions/checks');
 const antiSpamFunc = require('./functions/antispam');
 const guildLogs = require('./functions/guildLogs'); 
@@ -148,7 +149,7 @@ client.on('message', async message => {
 
         //we don't need memberGuildArr anymore
         memberGuildsArr = undefined;
-        
+
         if(!guild) return;
         //Handle channel checking and embed messages
         await modmail.ChannelMessageHandler(client, message, guild, messageUser, punishmentLog);
@@ -174,7 +175,6 @@ client.on('message', async message => {
             return message.reply('Sorry, you don\'t have permissions to use this!');
         }
     }
-
     // Arguments and staff check => args-info.js
     if (command.args && !args.length) {
         let reply = `You didn't provide any arguments, ${message.author}!`;
@@ -217,46 +217,15 @@ client.on('message', async message => {
     // logs punishment if log is true in module
     if (command.log) {
         try {
-            const logPunishment = async () => {
-                const user = message.mentions.members.first() || client.users.resolve(args[0]);
-                const member = message.guild.members.cache.find(m => m.id === user.id);
-
-                let reason = args.slice(1).join(' ');
-                if (!reason) reason = 'No reason provided';
-
-                const log = await punishmentLog.create({
-                    guildid: message.guild.id,
-                    userid: member.id,
-                    username: `${member}`,        
-                    punishment: command.name,
-                    reason: reason,
-                    staffName: `<@${message.author.id}>`,
-                });
-                // sends to channel in MOOC server for staff log
-                const channel = client.channels.cache.get(staffLogChannel);
-                if (channel) {
-                    const staffActionLogEmbed = new Discord.MessageEmbed()
-                    .setColor('PURPLE')
-                    .setAuthor('Staff Action Log')
-                    .setDescription(`Done by Staff ${log.staffName} to User: ${log.username} \`${log.userid}\``)
-                    .addField(`Action: ${log.punishment}`, `Reason: ${log.reason}`)
-                    .setFooter(`User Log ID: ${log.id}`);
-                    channel.send(staffActionLogEmbed);
-                }
-                return message.reply(`Log ${log.username} added.`);
-                
-            };
-            logPunishment(client, message, args, punishmentLog);
-        }
-        catch (e) {
-            if (e.name === 'SequelizeUniqueConstraintError') {
+            punishmentLogger.logPunishment(client, message, args, punishmentLog, command)
+        } catch (error) {
+            if (error.name === 'SequelizeUniqueConstraintError') {
                 return message.reply('That log already exists.');
             }
-            console.log(e);
+            console.log(error);
              return message.reply('Something went wrong with adding a log.');
         }
     }
-
 
 });
 
