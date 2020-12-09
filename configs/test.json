@@ -1,14 +1,15 @@
 {
-    "guild": "781964639117901845",
-    "ticketParentId": "785193151953895445",
-    "features": {
-        "Modmail": true,
-        "PunishLog": true
-    },
-    "commands": [],
-    "channels": {
-        "ticketParentId": "string",
-        "staffLogId": "781964639117901848",
-        "generalId": "string"
-    }
+  "guild": "781964639117901845",
+  "ticketParentId": "785193151953895445",
+  "features": {
+    "Modmail": true,
+    "PunishLog": true,
+    "StaffLog": true
+  },
+  "commands": [],
+  "channels": {
+    "ticketParentId": "string",
+    "staffLogId": "781964639117901848",
+    "generalId": "string"
+  }
 }

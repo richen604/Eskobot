@@ -1,18 +1,30 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-unused-vars */
 /* eslint-disable brace-style */
-const fs = require('fs');
-const ms = require('ms');
-const Discord = require('discord.js');
-const { 
-    prefix, token, staffLogChannel, strengthsMessageID, interestsMessageID, lfgHubParentID, contentHubParentID,
-    lfgVoteChannel, contentVoteChannel, rolesChannel, rulesChannel, strengthsObj, interestsObj, rulesMessageID, guildID,
-} = require('./config.json');
-const modmail = require('./functions/modmail');
-const punishmentLogger = require('./functions/punishmentLog');
-const checks = require('./functions/checks');
-const antiSpamFunc = require('./functions/antispam');
-const guildLogs = require('./functions/guildLogs'); 
+const fs = require("fs");
+const ms = require("ms");
+const Discord = require("discord.js");
+const {
+  prefix,
+  token,
+  staffLogChannel,
+  strengthsMessageID,
+  interestsMessageID,
+  lfgVoteChannel,
+  contentVoteChannel,
+  rolesChannel,
+  rulesChannel,
+  strengthsObj,
+  interestsObj,
+  guildID,
+} = require("./config.json");
+const modmail = require("./functions/modmail");
+const Kallant = require("./functions/Kallant");
+const punishmentLogger = require("./functions/punishmentLog");
+const checks = require("./functions/checks");
+const antiSpamFunc = require("./functions/antispam");
+const guildLogs = require("./functions/guildLogs");
+const staffLog = require("./functions/staffLogs");
 
 const antiSpam = antiSpamFunc.antispamInit();
 
@@ -24,27 +36,12 @@ const antiSpam = antiSpamFunc.antispamInit();
 //TODO Refactor to migrate from needing a config.json. or to be able to edit config.json within server (preferred)
 
 //TODO init command function
-/* 
-REQUIREMENT REFACTORING BEFORE INIT COMMAND WILL WORK
-- function for staff roles in modules
-- config folder for each server
-- function for handling default config
-
-
-INIT COMMAND TODOS
-- function to create config file (during init)
-- embeds to select options
-- message listeners to input data
-- input staff role names
-- select default settings or custom
-- custom settings requires supplying a json as an attachement to a message listener
-- create ticket channel if modmail was selected
-- select features on / off
-*/
 
 //TODO set up an init command to set up server functions like staff log and modmail ticket channels
 
-const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
+const client = new Discord.Client({
+  partials: ["MESSAGE", "CHANNEL", "REACTION"],
+});
 
 // sequelize initialization for punishmentLog and ticketLog
 const { punishmentLog, ticketLog } = guildLogs.guildLogsInit();
@@ -56,17 +53,21 @@ client.guildConfigs = new Discord.Collection();
 // Cooldowns initialization for later
 const cooldowns = new Discord.Collection();
 
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-const guildFiles = fs.readdirSync('./configs').filter(file => file.endsWith('.json'));
+const commandFiles = fs
+  .readdirSync("./commands")
+  .filter((file) => file.endsWith(".js"));
+const guildFiles = fs
+  .readdirSync("./configs")
+  .filter((file) => file.endsWith(".json"));
 
 for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
+  const command = require(`./commands/${file}`);
+  client.commands.set(command.name, command);
 }
 
 for (const file of guildFiles) {
-    const singleGuildConfig = require(`./configs/${file}`);
-    client.guildConfigs.set(singleGuildConfig.guild, singleGuildConfig);
+  const singleGuildConfig = require(`./configs/${file}`);
+  client.guildConfigs.set(singleGuildConfig.guild, singleGuildConfig);
 }
 
 // sync Sequelize tables
@@ -74,509 +75,281 @@ punishmentLog.sync();
 ticketLog.sync();
 
 // Bot start
-client.on('ready', async () => {
-    console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
-    client.user.setActivity('Message me for help!');
-    //TODO find a way to do a quick react/unreact feature to debug listeners 
+client.on("ready", async () => {
+  console.log(
+    `Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`
+  );
+  client.user.setActivity("Message me for help!");
+  //TODO find a way to do a quick react/unreact feature to debug listeners
 });
 
-
-client.on('guildCreate', guild => {
-    console.log(`New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
-    client.user.setActivity('Message me for help!');
+client.on("guildCreate", (guild) => {
+  console.log(
+    `New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`
+  );
+  client.user.setActivity("Message me for help!");
 });
 
-client.on('guildDelete', guild => {
-    console.log(`I have been removed from: ${guild.name} (id: ${guild.id})`);
-    client.user.setActivity('Message me for help!');
+client.on("guildDelete", (guild) => {
+  console.log(`I have been removed from: ${guild.name} (id: ${guild.id})`);
+  client.user.setActivity("Message me for help!");
 });
-
 
 // CLIENT ON MESSAGE
 
-client.on('message', async message => {
+client.on("message", async (message) => {
+  // ignore bots/self
+  if (message.author.bot) return;
 
-    // ignore bots/self
-    if (message.author.bot) return;
+  //init some consts for the rest of the event handler
+  const messageUser = message.author;
+  let messageMember = undefined;
+  let messageGuild = undefined;
+  if (message.guild) {
+    messageMember = await message.guild.members.fetch(messageUser.id);
+    messageGuild = message.guild.id;
+  }
+  const botGuildsId = client.guilds.cache.map((guild) => guild.id);
 
-    //init some consts for the rest of the event handler
-    const messageUser = message.author;
-    let messageMember = undefined;
-    let messageGuild = undefined;
-    if(message.guild) {
-        messageMember = await message.guild.members.fetch(messageUser.id);
-        messageGuild = message.guild.id;
+  //inits antiSpam package
+  antiSpam.message(message);
+
+  // split command and args, args being sliced array
+  const args = message.content.slice(prefix.length).trim().split(/ +/);
+  const commandName = args.shift().toLowerCase();
+
+  // command init
+  const command =
+    client.commands.get(commandName) ||
+    client.commands.find(
+      (cmd) => cmd.aliases && cmd.aliases.includes(commandName)
+    );
+
+  // If message is not in guild
+  //MODMAIL FUNCTION
+  if (!command && message.channel.type !== "text") {
+    //builds an array of guilds the user is a member in
+    let memberGuildsArr = [];
+    botGuildsId.forEach((guildId) => {
+      const guild = client.guilds.cache.get(guildId);
+      if (guild.members.fetch(messageUser.id)) {
+        memberGuildsArr.push(guild);
+      }
+    });
+
+    //Call a function to prompt user for feedback via an Embed Message to React to only if there are multiple guilds the user is in
+    let guild = undefined;
+    if (memberGuildsArr.length > 1) {
+      guild = await modmail.ModmailGuildPrompt(
+        message,
+        messageUser,
+        memberGuildsArr
+      );
+      if (!guild) return;
     }
-    const botGuildsId = client.guilds.cache.map(guild => guild.id);
+    //if only one guild just grabs first guild that member is in
+    if (memberGuildsArr.length === 1) {
+      guild = memberGuildsArr[0];
+    }
 
-    //inits antiSpam package
-    antiSpam.message(message);
+    //check for modmail off in guildConfig
+    if (!checks.featureConfigCheck(client, message, guild, "Modmail")) return;
 
-    // split command and args, args being sliced array
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const commandName = args.shift().toLowerCase();
+    //we don't need memberGuildArr anymore
+    memberGuildsArr = undefined;
 
-    // command init
-    const command = client.commands.get(commandName) ||
-        client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-
-    // If message is not in guild
-    //MODMAIL FUNCTION
-    if (!command && message.channel.type !== 'text') {
-
-        //builds an array of guilds the user is a member in
-        let memberGuildsArr = [];
-        botGuildsId.forEach(guildId => {
-            const guild = client.guilds.cache.get(guildId);
-            if (guild.members.fetch(messageUser.id)) {
-                memberGuildsArr.push(guild);
-            } 
-        });
-
-        //Call a function to prompt user for feedback via an Embed Message to React to only if there are multiple guilds the user is in
-        let guild = undefined;
-        if(memberGuildsArr.length > 1) {
-            guild = await modmail.ModmailGuildPrompt(message, messageUser, memberGuildsArr);
-            if(!guild) return;
-        }
-        //if only one guild just grabs first guild that member is in
-        if(memberGuildsArr.length === 1) {
-            guild = memberGuildsArr[0];
-        }
-
-        //check for modmail off in guildConfig
-        if(!checks.featureConfigCheck(client, message, guild, 'Modmail')) return;
-
-        //we don't need memberGuildArr anymore
-        memberGuildsArr = undefined;
-
-        if(!guild) return;
-        //Handle channel checking and embed messages
-        await modmail.ChannelMessageHandler(client, message, guild, messageUser, punishmentLog);
-        return;
-
-    } else if (!command) { // INIT REACT FOR CONTENT VOTING 
-        /*if (message.channel.id === contentVoteChannel){
+    if (!guild) return;
+    //Handle channel checking and embed messages
+    await modmail.ChannelMessageHandler(
+      client,
+      message,
+      guild,
+      messageUser,
+      punishmentLog
+    );
+    return;
+  } else if (!command) {
+    // INIT REACT FOR CONTENT VOTING
+    /*if (message.channel.id === contentVoteChannel){
             await message.react('👍')
         } else {
             return;
         }*/
-    } else if (message.content.startsWith(prefix) && command.guildOnly && message.channel.type !== 'text') {
-        return;
+  } else if (
+    message.content.startsWith(prefix) &&
+    command.guildOnly &&
+    message.channel.type !== "text"
+  ) {
+    return;
+  }
+
+  //Returning if theres no command or message isn't prefix
+  if (!command && !message.content.startsWith(prefix)) return;
+
+  //START COMMAND HANDLING LOGIC
+
+  if (command.staffRoles) {
+    if (
+      !message.member.roles.cache.some((r) =>
+        command.staffRoles.includes(r.name)
+      )
+    ) {
+      return message.reply("Sorry, you don't have permissions to use this!");
     }
+  }
+  // Arguments and staff check => args-info.js
+  if (command.args && !args.length) {
+    let reply = `You didn't provide any arguments, ${message.author}!`;
 
-    //Returning if theres no command or message isn't prefix
-    if (!command && !message.content.startsWith(prefix)) return;
-
-    //START COMMAND HANDLING LOGIC
-
-    if (command.staffRoles) {
-        if (!message.member.roles.cache.some(r => command.staffRoles.includes(r.name))) {
-            return message.reply('Sorry, you don\'t have permissions to use this!');
-        }
+    if (command.usage && command.staffRoles) {
+      reply += `\nThe proper usage would be: \`${prefix}${command.name} ${command.usage}\``;
     }
-    // Arguments and staff check => args-info.js
-    if (command.args && !args.length) {
-        let reply = `You didn't provide any arguments, ${message.author}!`;
+    return message.channel.send(reply);
+  }
 
-        if (command.usage && command.staffRoles) {
-            reply += `\nThe proper usage would be: \`${prefix}${command.name} ${command.usage}\``;
-        }
-        return message.channel.send(reply);
+  if (!cooldowns.has(command.name)) {
+    cooldowns.set(command.name, new Discord.Collection());
+  }
+
+  const now = Date.now();
+  const timestamps = cooldowns.get(command.name);
+  const cooldownAmount = (command.cooldown || 3) * 1000;
+
+  if (timestamps.has(message.author.id)) {
+    const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
+
+    if (now < expirationTime) {
+      const timeLeft = (expirationTime - now) / 1000;
+      return message.reply(
+        `please wait ${timeLeft.toFixed(
+          1
+        )} more second(s) before reusing the \`${command.name}\` command.`
+      );
     }
+  }
 
+  timestamps.set(message.author.id, now);
+  setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
-    if (!cooldowns.has(command.name)) {
-        cooldowns.set(command.name, new Discord.Collection());
-    }
+  try {
+    command.execute(
+      client,
+      message,
+      args,
+      punishmentLog,
+      rolesChannel,
+      strengthsObj
+    );
+  } catch (error) {
+    console.error(error);
+    message.reply(`Couldn't execute that command because of \`${error}\``);
+  }
 
-    const now = Date.now();
-    const timestamps = cooldowns.get(command.name);
-    const cooldownAmount = (command.cooldown || 3) * 1000;
-
-
-    if (timestamps.has(message.author.id)) {
-        const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
-
-        if (now < expirationTime) {
-            const timeLeft = (expirationTime - now) / 1000;
-            return message.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
-        }
-    }
-
-    timestamps.set(message.author.id, now);
-    setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
-
+  // logs punishment if log is true in module
+  if (command.log) {
     try {
-        command.execute(client, message, args, punishmentLog, rolesChannel, strengthsObj);
+      punishmentLogger.logPunishment(
+        client,
+        message,
+        args,
+        punishmentLog,
+        command
+      );
     } catch (error) {
-        console.error(error);
-        message.reply(`Couldn't execute that command because of \`${error}\``);
+      if (error.name === "SequelizeUniqueConstraintError") {
+        return message.reply("That log already exists.");
+      }
+      console.log(error);
+      return message.reply("Something went wrong with adding a log.");
     }
-
-    // logs punishment if log is true in module
-    if (command.log) {
-        try {
-            punishmentLogger.logPunishment(client, message, args, punishmentLog, command)
-        } catch (error) {
-            if (error.name === 'SequelizeUniqueConstraintError') {
-                return message.reply('That log already exists.');
-            }
-            console.log(error);
-             return message.reply('Something went wrong with adding a log.');
-        }
-    }
-
+  }
 });
 
 // AntiSpam Error Logging
 
-antiSpam.on('error', (message, error, type) => {
-	console.log(`${message.author.tag} couldn't receive the sanction '${type}', error: ${error}`);
+antiSpam.on("error", (message, error, type) => {
+  console.log(
+    `${message.author.tag} couldn't receive the sanction '${type}', error: ${error}`
+  );
 });
 
 // Client Reaction listener
 
-client.on('messageReactionAdd', async (reaction, user) => {
-    
-    // only listen for reactions in channels we want to handle reactions
-    if (!reaction.message.channel.id === (lfgVoteChannel || contentVoteChannel || rolesChannel || rulesChannel)) return;
-    // if partial check
-	if (reaction.partial) {
-		// try catch for fetching
-		try {
-			await reaction.fetch();
-		} catch (error) {
-			console.log('Something went wrong when fetching the message: ', error);
-			return;
-		}
+client.on("messageReactionAdd", async (reaction, user) => {
+  // if partial check
+  if (reaction.partial) {
+    // try catch for fetching
+    try {
+      await reaction.fetch();
+    } catch (error) {
+      console.log("Something went wrong when fetching the message: ", error);
+      return;
     }
-    
-    //if reaction is not in the server return
-    if(!reaction.message.guild) return;
+  }
 
-    const guildId = reaction.message.guild.id;
-    // ignore other servers until i set them up
-    if (guildId !== '731220209511432334') return;
-    const member = reaction.message.guild.members.cache.find(u => u.user === user);
+  //if reaction is not in the server return
+  if (!reaction.message.guild) return;
 
-    //ignore reaction listener if it is from a bot
-    if (member.bot) return;
-    
-    
-    // RULES FUNCTION
-    if (reaction.message.id === rulesMessageID && reaction.emoji.name === '📚'); {
-        // Find role Pupil and add it to the user
-        const role = reaction.message.guild.roles.cache.find(roleFind => roleFind.name === 'Pupil');
-        member.roles.add(role);
-    }
+  //guild declaration
+  const guildId = reaction.message.guild.id;
 
-    // ROLES ADD FUNCTION
-    //Strengths Role Add Function
-    if (reaction.message.id === strengthsMessageID) {
-        //collection of reactions that user is in
-        const userReactions = reaction.message.reactions.cache.filter(reactionFilter => reactionFilter.users.cache.has(member.id));
-        const userReactionsArr = userReactions.keyArray();
-        const firstReact = userReactions.last();
+  // Kallant ReactionAddHandler
+  if (guildId !== "731220209511432334") return;
+  Kallant.ReactionAddHandler(client, reaction, user).catch((err) => {
+    console.log("There was an error with Kallants ReactionAddHandler");
+    console.log(err);
+  });
+});
 
-        //console logs if firstReact is undefined (bug)
-        //BUG if the user reacts after bot restart it will not give correct role => reaction returns undefined
-        //BUG If user reacts WITH REACTION after bot restart it not give correct role
-        //TODO list user strengths roles, if has role remove all reacts and roles except one if the reaction is a role the user has
+client.on("messageReactionRemove", async (reaction, user) => {
+  //guild declaration
+  const guildId = reaction.message.guild.id;
 
-        //Strengths Roles exist check
-
-            /*const roleCheck = member.roles.cache.filter(role => role.name === strengthsObj[reaction.emoji.name])
-            if (!roleCheck || (reaction === roleCheck.last())) return
-            console.log(`Comparing value: ${value} to roleCheck: ${roleCheck}`)
-            await member.roles.remove(roleCheck)*/
-
-
-        if (firstReact == undefined) {
-            console.log(`Member id ${member.id} tried to select a Strength, may open ticket`);
-            return;
-        //Adds Strengths Role if first
-        } else if (firstReact && (firstReact.emoji.name === reaction.emoji.name)) {
-            const strengthsRole = reaction.message.guild.roles.cache.find(r => r.name === strengthsObj[firstReact.emoji.name]);
-            await member.roles.add(strengthsRole);
-            return;
-        //Removes react if already selected a role
-        } else if (firstReact && (userReactionsArr.length > 1)) {
-            for (const reactionFind of userReactions.values()) {
-                if (reactionFind.emoji.name === firstReact.emoji.name) return;
-                await reaction.users.remove(member.id);
-            }
-            return;
-        }
-        return;
-
-    }
-
-    //INTERESTS ROLE ADD FUNCTION
-    if (reaction.message.id === interestsMessageID) {
-
-        //TODO if user has a strengthRole and applies an interestRole returns (vise versa)
-        const interestsRole = reaction.message.guild.roles.cache.find(r => r.name === interestsObj[reaction.emoji.name]);
-        await member.roles.add(interestsRole);
-        return;
-
-    }
-
-    // VOTE ADD FUNCTION
-
-    //LFG Vote Function
-    if (reaction.message.channel.id === lfgVoteChannel) {
-        
-        
-        //Changes lfgCount relative to how many channels exist
-        const getLfgHub = client.channels.cache.filter(c => c.parentID === lfgHubParentID);
-        const arr = getLfgHub.keyArray();
-        console.log(`arr length is ${arr.length}`);
-        let lfgCount = 3;
-        if (arr.length > 1) {
-            lfgCount = arr.length * 10;
-        }
-        console.log(`lfg count is ${lfgCount}`);
-        //finds only the channels that are over lfg count
-        const reactionCount = reaction.message.reactions.cache.find(reactionFind => reactionFind.count >= lfgCount);
-        if (!reactionCount) return; // ignores reacts that aren't greater or equal to the first lfgCount
-        await reaction.message.channel.messages.fetch(); //fetches the messages from cache
-
-        // this gets the description for channel finding/making usage
-        const category = reaction.message.embeds[0];
-        const categoryName = category.fields[0].value.replace(/\s+/g, '-').toLowerCase();
-        
-        
-        const findCategoryContent = client.channels.cache.find(c => c.name === categoryName);
-        const findCategoryLfg = client.channels.cache.find(c => c.name === categoryName);
-
-
-        //check if message.content / channel.name exist in both contentHub or lfgHub
-        if (findCategoryContent && findCategoryLfg) {
-            return console.log(`LfgVote: Channel ${category.fields[0].value} already exists`);
-        } else {
-            const guild = client.guilds.cache.get(guildID);
-            //creates channel in both Lfg-hub and Content-hub
-            //LFG-Hub
-            const lfgChannelCreate = await guild.channels.create(category.fields[0].value, {
-                type: 'text', 
-                parent: lfgHubParentID, // id of lfg-hub channel category
-            });
-            lfgChannelCreate()
-            .catch(err => console.log('There was an error with making channel for LfgVote', err));
-            //Content-Hub
-            const contentChannelCreate = await guild.channels.create(category.fields[0].value, {
-                type: 'text', 
-                parent: contentHubParentID, // id of lfg-hub channel category
-            });
-            contentChannelCreate()
-            .catch(err => console.log('There was an error with making channel for ContentVote', err));
-        }
-    }
-
-
-    //CONTENT VOTING
-    /*if (reaction.channel.id === contentVoteChannel) {
-        let contentCount = 3 //number of votes for content to be posted
-        if (guild.memberCount > 50) {
-            contentCount = (guild.memberCount / 10)
-        }
-        let reactionCount = reaction.message.cache.find(reaction => reaction.count >= contentCount)
-        if (!reactionCount) return;
-    }*/
-
-    
-}); 
-
-client.on('messageReactionRemove', async (reaction, user) => {
-
-    // only listen for reactions in channels we want to handle reactions
-    if (!reaction.message.channel.id === (lfgVoteChannel || contentVoteChannel || rolesChannel || rulesChannel)) return;
-	// if partial check
-	if (reaction.partial) {
-		// try catch for fetching
-		try {
-            await reaction.fetch();
-		} catch (error) {
-			console.log('Something went wrong when fetching the message: ', error);
-			return;
-		}
-    }
-    
-    const guildId = reaction.message.guild.id;
-    // ignore other servers until i set them up
-    if (guildId !== '731220209511432334') return;
-    const member = reaction.message.guild.members.cache.find(u => u.user === user);
-    
-    // Roles Removal Function
-
-    //Strengths Role
-    if (reaction.message.id === strengthsMessageID) {
-        const strengthsRole = reaction.message.guild.roles.cache.find(r => r.name === strengthsObj[reaction.emoji.name]);
-        await member.roles.remove(strengthsRole);
-    }
-    //Interests Role
-    if (reaction.message.id === interestsMessageID) {
-
-        //TODO if user has a strengthRole and applies an interestRole returns (vise versa)
-        const interestsRole = reaction.message.guild.roles.cache.find(r => r.name === interestsObj[reaction.emoji.name]);
-        await member.roles.remove(interestsRole);
-        return;
-
-    }
-
-    // TODO Add Vote Removal Function
-    // Vote Removal Function
-
-    
-}); 
-
+  // Kallant ReactionRemoveHandler
+  if (guildId !== "731220209511432334") return;
+  Kallant.ReactionRemoveHandler(client, reaction, user).catch((err) => {
+    console.log("There was an error with Kallants ReactionRemoveHandler");
+    console.log(err);
+  });
+});
 
 // Client message delete logger
 
-client.on('messageDelete', async message => {
+client.on("messageDelete", async (message) => {
+  if (!message.guild) return;
 
-    if (!message.guild) return;
-
-    if (message.partial) {
-		// try catch for fetching
-		try {
-			await message.fetch();
-		} catch (error) {
-            if (error === 'DiscordAPIError: Unknown Message') {return console.log('User deleted a message prior to bot update, wont log');
-            } else { return console.log('Something went wrong when fetching the message: ', error);}
-		}
-    }
-
-    const guildId = message.guild.id;
-    // ignore logs from other servers until i set them up
-    if (guildId !== guildID) return;
-
-    try {
-        await message.channel.messages.cache.find(m => m.id === message.id);
-    } catch (error) {
-        console.log('Something went wrong when trying to fetch message from cache in messageDelete', error);
-    }
-    
-    const deleteChannel = client.channels.cache.get(staffLogChannel);
-    const member = message.guild.members.cache.find(u => u.user === message.author);
-
-    try {
-        if (!member) return;
-        if (member.bot) return;
-        if ((message.content || message.author) === undefined) return console.log('Probably tried to delete a message before bot restart, won\'t log');
-    } catch (error) {
-        return console.log('There was an error in conditions of messageDelete', error);
-    }
-    try {
-        const deleteEmbed = new Discord.MessageEmbed()
-        .setColor('BLUE')
-        //TODO Add Garbage Can Icon to Author deleteEmbed
-        .setAuthor('User Delete A Message')
-        .setDescription(`ID: ${message.id} | In: ${message.channel}\nUser: ${message.author} \`${message.author.tag} , ${message.author.id}\``)
-        .addField('_ _', `Message Content: \`${message.content}\``);
-        deleteChannel.send(deleteEmbed);
-    } catch (error) {
-        return console.log('There was an error sending a message to deleteChannel in staffLog', error);
-    }
-	
+  staffLog.MessageDeleteHandler(client, message).catch((err) => {
+    console.log("There was an error with MessageDeleteHandler", err);
+  });
 });
 
 // Client message edit logger
 
-client.on('messageUpdate', async (oldMessage, newMessage) => {
-
-    const editChannel = client.channels.cache.get(staffLogChannel);
-    const rules = '735537345981579457';
-    const getRoles = '744536926757060683';
-
-    
-    if (newMessage.channel.id === (rules || getRoles)) return;
-    //if (!oldMessage.guild.id === '731220209511432334') return;
-    if (!oldMessage.guild || !newMessage.guild) return;
-    
-
-    if (oldMessage.partial) {
-		// try catch for fetching
-		try {
-			await oldMessage.fetch();
-		} catch (error) {
-			console.log('Something went wrong when fetching the message: ', error);
-			return;
-		}
-    }
-
-    try {
-         oldMessage.channel.messages.cache.find(m => m.id === oldMessage.id);
-    } catch (error) {
-        console.log('Something went wrong with fetching the message id', error);
-    }
-
-    if (oldMessage.content === undefined) return console.log('oldMessage is returning undefined, probably edited a message before bot was restarted. May not log');
-    
-
-    if (newMessage.partial) {
-		// try catch for fetching
-		try {
-			await newMessage.fetch();
-		} catch (error) {
-			console.log('Something went wrong when fetching the message: ', error);
-			return;
-		}
-    }
-
-    try {
-        if (newMessage.author.bot || oldMessage.author.bot) return;
-    } catch (error) {
-        console.log(`Message Edit Listener Error: Checking if message editor is a bot returned an error, \n ${error}`);
-    }
-    
-
-    const guildId = newMessage.guild.id;
-    // ignore logs from other servers until i set them up
-    if (guildId !== guildID) return;
-    
-    const user = oldMessage.guild.members.cache.find(u => u.user === newMessage.author);
-
-    try {
-        if (user.bot) return;
-    } catch (error) {
-        console.log(`Message Edit Listener Error: checking if user is bot returned an error, \n ${error}`);
-    }
-   
-
-    const editEmbed = new Discord.MessageEmbed()
-    .setColor('YELLOW')
-    .setAuthor('User Edited a Message')
-    .setDescription(`Message ID: ${newMessage.id} in ${newMessage.channel} \nUser: ${newMessage.author} \`${newMessage.author.tag}, ${newMessage.author.id}\``)
-    .addFields({ name: 'Old Message:', value: `${oldMessage.content}` }, { name: 'New Message', value: `${newMessage.content}` });
-
-    editChannel.send(editEmbed);
-
+client.on("messageUpdate", async (oldMessage, newMessage) => {
+  staffLog.MessageUpdateHandler(client, oldMessage, newMessage);
 });
 
-client.on('guildMemberAdd', member => {
-    const staffLog = client.channels.cache.get(staffLogChannel);
-    const dateJoined = ms(member.user.createdTimestamp);
-    const memberAddEmbed = new Discord.MessageEmbed()
-    .setColor('GREEN')
+client.on("guildMemberAdd", (member) => {
+  const staffLog = client.channels.cache.get(staffLogChannel);
+  const dateJoined = ms(member.user.createdTimestamp);
+  const memberAddEmbed = new Discord.MessageEmbed()
+    .setColor("GREEN")
     //TODO add green check to author
-    .setAuthor('User Joined The Server')
+    .setAuthor("User Joined The Server")
     .setDescription(`User: ${member} | \`${member.user.tag}, ${member.id}\` `)
-    .addField('User Joined Discord:', `${dateJoined}`);
-    staffLog.send(memberAddEmbed);
+    .addField("User Joined Discord:", `${dateJoined}`);
+  staffLog.send(memberAddEmbed);
 });
 
-client.on('guildMemberRemove', member => {
-    const staffLog = client.channels.cache.get(staffLogChannel);
-    const timeLeft = ms(Date.now() - member.joinedAt);
-    const memberRemoveEmbed = new Discord.MessageEmbed()
-    .setColor('RED')
-    .setAuthor('User Left The Server')
+client.on("guildMemberRemove", (member) => {
+  const staffLog = client.channels.cache.get(staffLogChannel);
+  const timeLeft = ms(Date.now() - member.joinedAt);
+  const memberRemoveEmbed = new Discord.MessageEmbed()
+    .setColor("RED")
+    .setAuthor("User Left The Server")
     .setDescription(`User: ${member} | \`${member.user.tag}, ${member.id}\` `)
-    .addField('User Left The Server After:', `${timeLeft}`);
-    staffLog.send(memberRemoveEmbed);
+    .addField("User Left The Server After:", `${timeLeft}`);
+  staffLog.send(memberRemoveEmbed);
 });
-
 
 client.login(token);

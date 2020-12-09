@@ -23,5 +23,8 @@
         "pm2": "^4.5.0",
         "sequelize": "^6.3.5",
         "sqlite3": "^5.0.0"
+    },
+    "devDependencies": {
+        "eslint-config-prettier": "^7.0.0"
     }
 }

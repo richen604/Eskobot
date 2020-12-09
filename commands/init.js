@@ -1,4 +1,21 @@
 /*
+REQUIREMENT REFACTORING BEFORE INIT COMMAND WILL WORK
+- function for staff roles in modules
+- config folder for each server
+- function for handling default config
+
+
+INIT COMMAND TODOS
+- function to create config file (during init)
+- embeds to select options
+- message listeners to input data
+- input staff role names
+- select default settings or custom
+- custom settings requires supplying a json as an attachement to a message listener
+- create ticket channel if modmail was selected
+- select features on / off
+
+
 UNSORTED NOTES:
 - How will I add the guild config without restart
     - function that turns config jsons into and array of objects

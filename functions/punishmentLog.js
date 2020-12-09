@@ -6,6 +6,8 @@ const logPunishment = async function(client, message, args, punishmentLog, comma
     const user = message.mentions.members.first() || client.users.resolve(args[0]);
     const member = message.guild.members.cache.find(m => m.id === user.id);
 
+    console.dir(member);
+
     //checks if punishmentLog true in guildconfig
     if(!featureConfigCheck(client, message, message.guild, 'PunishLog')) return;
 
