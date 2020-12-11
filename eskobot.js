@@ -230,7 +230,14 @@ client.on("message", async (message) => {
 
   // logs punishment if log is true in module and true in guildConfig
   if (command.log) {
-    if (!(await checks.featureConfigCheck(client, message, guild, "PunishLog")))
+    if (
+      !(await checks.featureConfigCheck(
+        client,
+        message,
+        message.guild,
+        "PunishLog"
+      ))
+    )
       return;
     try {
       punishmentLogger.logPunishment(
