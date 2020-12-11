@@ -4,7 +4,7 @@
 const fs = require("fs");
 const ms = require("ms");
 const Discord = require("discord.js");
-const { prefix, token } = require("./config.json");
+const { prefix, token, KallantGuildID } = require("./config.json");
 const modmail = require("./functions/modmail");
 const Kallant = require("./functions/Kallant");
 const punishmentLogger = require("./functions/punishmentLog");

@@ -6,10 +6,9 @@ module.exports = {
   usage: "<null> || <reason>",
   staffRoles: ["Exec. Director", "Board Member", "Staff", "Comfy", ".", "+"],
   execute(client, message, args) {
+    if (!featureConfigCheck(client, message, message.guild, "Modmail")) return;
 
-    if(!(await featureConfigCheck(client, message, message.guild, "Modmail"))) return;
-
-    const currentGuildConfig = await client.guildConfigs.get(guild.id);
+    const currentGuildConfig = client.guildConfigs.get(message.guild.id);
 
     //TODO make a ticket database including reason, userid, staff that closed ticket
 
