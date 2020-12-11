@@ -219,7 +219,8 @@ client.on("message", async (message) => {
   setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
   //check if command is allowed in guildConfig
-  if (!checks.commandConfigCheck(client, message, guild, command)) return;
+  if (!checks.commandConfigCheck(client, message, message.guild, command))
+    return;
   try {
     command.execute(client, message, args, punishmentLog);
   } catch (error) {
