@@ -1,0 +1,28 @@
+{
+  "guild": "",
+  "ticketParentId": "",
+  "features": {
+    "Modmail": true,
+    "PunishLog": true,
+    "StaffLog": true
+  },
+  "commands": [
+    "ban",
+    "bork",
+    "close",
+    "help",
+    "kick",
+    "mute",
+    "ping",
+    "purge",
+    "reply",
+    "unmute",
+    "userlog",
+    "warn"
+  ],
+  "channels": {
+    "ticketParentId": "string",
+    "staffLogId": "string",
+    "generalId": "string"
+  }
+}

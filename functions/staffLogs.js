@@ -35,10 +35,6 @@ const MessageDeleteHandler = async function (client, message) {
   const currentGuildConfig = client.guildConfigs.get(message.guild.id);
   const staffLogId = currentGuildConfig.channels["staffLogId"];
   const staffLogChannel = message.guild.channels.cache.get(staffLogId);
-
-  console.log("This is staff log channel ID", staffLogId);
-  console.log("This is staff log channel", staffLogChannel);
-
   try {
     message.channel.messages.cache.find((m) => m.id === message.id);
   } catch (error) {
@@ -157,7 +153,42 @@ const MessageUpdateHandler = async function (client, oldMessage, newMessage) {
   staffLogChannel.send(editEmbed);
 };
 
+const MemberAddHandler = async function (client, member) {
+  //get staffLogChannel from currentGuildConfig
+  const currentGuildConfig = client.guildConfigs.get(member.guild.id);
+  const staffLogId = currentGuildConfig.channels["staffLogId"];
+  if (!staffLogId) return; //usually return a message or console log but this would spam
+  const staffLogChannel = member.guild.channels.cache.get(staffLogId);
+
+  const dateJoined = ms(member.user.createdTimestamp);
+  const memberAddEmbed = new Discord.MessageEmbed()
+    .setColor("GREEN")
+    //TODO add green check to author
+    .setAuthor("User Joined The Server")
+    .setDescription(`User: ${member} | \`${member.user.tag}, ${member.id}\` `)
+    .addField("User Joined Discord:", `${dateJoined}`);
+  staffLogChannel.send(memberAddEmbed);
+};
+
+const MemberRemoveHandler = function (client, member) {
+  //get staffLogChannel from currentGuildConfig
+  const currentGuildConfig = client.guildConfigs.get(member.guild.id);
+  const staffLogId = currentGuildConfig.channels["staffLogId"];
+  if (!staffLogId) return; //usually return a message or console log but this would spam
+  const staffLogChannel = member.guild.channels.cache.get(staffLogId);
+
+  const timeLeft = ms(Date.now() - member.joinedAt);
+  const memberRemoveEmbed = new Discord.MessageEmbed()
+    .setColor("RED")
+    .setAuthor("User Left The Server")
+    .setDescription(`User: ${member} | \`${member.user.tag}, ${member.id}\` `)
+    .addField("User Left The Server After:", `${timeLeft}`);
+  staffLogChannel.send(memberRemoveEmbed);
+};
+
 module.exports = {
   MessageDeleteHandler,
   MessageUpdateHandler,
+  MemberAddHandler,
+  MemberRemoveHandler,
 };

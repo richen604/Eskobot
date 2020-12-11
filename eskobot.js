@@ -4,20 +4,7 @@
 const fs = require("fs");
 const ms = require("ms");
 const Discord = require("discord.js");
-const {
-  prefix,
-  token,
-  staffLogChannel,
-  strengthsMessageID,
-  interestsMessageID,
-  lfgVoteChannel,
-  contentVoteChannel,
-  rolesChannel,
-  rulesChannel,
-  strengthsObj,
-  interestsObj,
-  guildID,
-} = require("./config.json");
+const { prefix, token } = require("./config.json");
 const modmail = require("./functions/modmail");
 const Kallant = require("./functions/Kallant");
 const punishmentLogger = require("./functions/punishmentLog");
@@ -231,22 +218,19 @@ client.on("message", async (message) => {
   timestamps.set(message.author.id, now);
   setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
+  //check if command is allowed in guildConfig
+  if (!checks.commandConfigCheck(client, message, guild, command)) return;
   try {
-    command.execute(
-      client,
-      message,
-      args,
-      punishmentLog,
-      rolesChannel,
-      strengthsObj
-    );
+    command.execute(client, message, args, punishmentLog);
   } catch (error) {
     console.error(error);
     message.reply(`Couldn't execute that command because of \`${error}\``);
   }
 
-  // logs punishment if log is true in module
+  // logs punishment if log is true in module and true in guildConfig
   if (command.log) {
+    if (!(await checks.featureConfigCheck(client, message, guild, "PunishLog")))
+      return;
     try {
       punishmentLogger.logPunishment(
         client,
@@ -290,11 +274,9 @@ client.on("messageReactionAdd", async (reaction, user) => {
   //if reaction is not in the server return
   if (!reaction.message.guild) return;
 
-  //guild declaration
-  const guildId = reaction.message.guild.id;
-
   // Kallant ReactionAddHandler
-  if (guildId !== "731220209511432334") return;
+  const guildId = reaction.message.guild.id;
+  if (guildId !== KallantGuildID) return;
   Kallant.ReactionAddHandler(client, reaction, user).catch((err) => {
     console.log("There was an error with Kallants ReactionAddHandler");
     console.log(err);
@@ -302,11 +284,22 @@ client.on("messageReactionAdd", async (reaction, user) => {
 });
 
 client.on("messageReactionRemove", async (reaction, user) => {
-  //guild declaration
-  const guildId = reaction.message.guild.id;
+  // if partial check
+  if (reaction.partial) {
+    // try catch for fetching
+    try {
+      await reaction.fetch();
+    } catch (error) {
+      console.log("Something went wrong when fetching the message: ", error);
+      return;
+    }
+  }
+
+  if (!reaction.message.guild) return;
 
   // Kallant ReactionRemoveHandler
-  if (guildId !== "731220209511432334") return;
+  const guildId = reaction.message.guild.id;
+  if (guildId !== KallantGuildID) return;
   Kallant.ReactionRemoveHandler(client, reaction, user).catch((err) => {
     console.log("There was an error with Kallants ReactionRemoveHandler");
     console.log(err);
@@ -317,7 +310,6 @@ client.on("messageReactionRemove", async (reaction, user) => {
 
 client.on("messageDelete", async (message) => {
   if (!message.guild) return;
-
   staffLog.MessageDeleteHandler(client, message).catch((err) => {
     console.log("There was an error with MessageDeleteHandler", err);
   });
@@ -326,30 +318,20 @@ client.on("messageDelete", async (message) => {
 // Client message edit logger
 
 client.on("messageUpdate", async (oldMessage, newMessage) => {
+  if (!newMessage.guild) return;
   staffLog.MessageUpdateHandler(client, oldMessage, newMessage);
 });
 
 client.on("guildMemberAdd", (member) => {
-  const staffLog = client.channels.cache.get(staffLogChannel);
-  const dateJoined = ms(member.user.createdTimestamp);
-  const memberAddEmbed = new Discord.MessageEmbed()
-    .setColor("GREEN")
-    //TODO add green check to author
-    .setAuthor("User Joined The Server")
-    .setDescription(`User: ${member} | \`${member.user.tag}, ${member.id}\` `)
-    .addField("User Joined Discord:", `${dateJoined}`);
-  staffLog.send(memberAddEmbed);
+  staffLog.MemberAddHandler(client, member).catch((err) => {
+    console.log("There was an error with staffLog.MemberAddHandler", err);
+  });
 });
 
 client.on("guildMemberRemove", (member) => {
-  const staffLog = client.channels.cache.get(staffLogChannel);
-  const timeLeft = ms(Date.now() - member.joinedAt);
-  const memberRemoveEmbed = new Discord.MessageEmbed()
-    .setColor("RED")
-    .setAuthor("User Left The Server")
-    .setDescription(`User: ${member} | \`${member.user.tag}, ${member.id}\` `)
-    .addField("User Left The Server After:", `${timeLeft}`);
-  staffLog.send(memberRemoveEmbed);
+  staffLog.MemberRemoveHandler(client, member).catch((err) => {
+    console.log("There was an error with staffLog.MemberRemoveHandler", err);
+  });
 });
 
 client.login(token);

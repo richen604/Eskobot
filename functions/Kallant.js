@@ -5,13 +5,43 @@ const {
   contentVoteChannel,
   rolesChannel,
   rulesChannel,
-  strengthsObj,
-  interestsObj,
-  guildID,
+  KallantGuildID,
   rulesMessageID,
   lfgHubParentID,
   contentHubParentID,
 } = require("../config.json");
+
+const strengthsObj = {
+  "🧩": "Art and Design 🧩",
+  "👔": "Business 👔",
+  "💻": "Computer Science 💻",
+  "🖥️": "Data Science 🖥️",
+  "🦺": "Engineering 🦺",
+  "📌": "Education and Teaching 📌",
+  "💉": "Health and Medicine 💉",
+  "🔎": "Humanities 🔎",
+  "⌨️": "Programming ⌨️",
+  "🗿": "Personal Development 🗿",
+  "📐": "Mathematics 📐",
+  "🔬": "Sciences 🔬",
+  "💡": "Social Sciences 💡",
+};
+
+const interestsObj = {
+  "🧩": "Art and Design",
+  "👔": "Business",
+  "💻": "Computer Science",
+  "🖥️": "Data Science",
+  "🦺": "Engineering",
+  "📌": "Education and Teaching",
+  "💉": "Health and Medicine",
+  "🔎": "Humanities",
+  "⌨️": "Programming",
+  "🗿": "Personal Development",
+  "📐": "Mathematics",
+  "🔬": "Sciences",
+  "💡": "Social Sciences",
+};
 
 const ReactionAddHandler = async function (client, reaction, user) {
   const member = reaction.message.guild.members.cache.find(
@@ -127,7 +157,7 @@ const ReactionAddHandler = async function (client, reaction, user) {
         `LfgVote: Channel ${category.fields[0].value} already exists`
       );
     } else {
-      const guild = client.guilds.cache.get(guildID);
+      const guild = client.guilds.cache.get(KallantGuildID);
       //creates channel in both Lfg-hub and Content-hub
       //LFG-Hub
       const lfgChannelCreate = await guild.channels.create(

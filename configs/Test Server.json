@@ -6,7 +6,20 @@
     "PunishLog": true,
     "StaffLog": true
   },
-  "commands": [],
+  "commands": [
+    "ban",
+    "bork",
+    "close",
+    "help",
+    "kick",
+    "mute",
+    "ping",
+    "purge",
+    "reply",
+    "unmute",
+    "userlog",
+    "warn"
+  ],
   "channels": {
     "ticketParentId": "string",
     "staffLogId": "781964639117901848",

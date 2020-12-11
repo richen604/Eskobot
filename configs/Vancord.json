@@ -1,0 +1,26 @@
+{
+  "guild": "623389701935726595",
+  "ticketParentId": "786825016066179102",
+  "features": {
+    "Modmail": true,
+    "PunishLog": true,
+    "StaffLog": true
+  },
+  "commands": [
+    "ban",
+    "bork",
+    "close",
+    "help",
+    "kick",
+    "mute",
+    "ping",
+    "purge",
+    "reply",
+    "unmute",
+    "userlog",
+    "warn"
+  ],
+  "channels": {
+    "staffLogId": "786825421576208414"
+  }
+}
