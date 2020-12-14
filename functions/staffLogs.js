@@ -119,10 +119,10 @@ const MessageUpdateHandler = async function (client, oldMessage, newMessage) {
     }
   }
 
-  //return if oldMessage is the same as newMessage
+  //return if oldMessage is the same as newMessage or if either are null
   //Often this happens when user adds a file, a link is given with an embed, or a message is pinned to a channel
-  if (oldMessage === newMessage) return;
-  if ((oldMessage || newMessage) === null) return;
+  if ((oldMessage.content || newMessage.content) === null) return;
+  if (oldMessage.content === newMessage.content) return;
 
   //get staffLogChannel from currentGuildConfig
   const currentGuildConfig = client.guildConfigs.get(newMessage.guild.id);
