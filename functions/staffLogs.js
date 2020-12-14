@@ -1,5 +1,6 @@
 const { featureConfigCheck } = require("./checks.js");
 const Discord = require("discord.js");
+const { prefix } = require("../config.json");
 
 const MessageDeleteHandler = async function (client, message) {
   const staffLogCheck = await featureConfigCheck(
@@ -31,10 +32,14 @@ const MessageDeleteHandler = async function (client, message) {
     }
   }
 
+  //ignore messages with prefix as first character
+  if (message.content.indexOf(prefix) === 0) return;
+
   //get staffLogChannel from currentGuildConfig
   const currentGuildConfig = client.guildConfigs.get(message.guild.id);
   const staffLogId = currentGuildConfig.channels["staffLogId"];
   const staffLogChannel = message.guild.channels.cache.get(staffLogId);
+
   try {
     message.channel.messages.cache.find((m) => m.id === message.id);
   } catch (error) {
@@ -114,18 +119,15 @@ const MessageUpdateHandler = async function (client, oldMessage, newMessage) {
     }
   }
 
+  //return if oldMessage is the same as newMessage
+  //Often this happens when user adds a file, a link is given with an embed, or a message is pinned to a channel
+  if (oldMessage === newMessage) return;
+  if ((oldMessage || newMessage) === null) return;
+
   //get staffLogChannel from currentGuildConfig
   const currentGuildConfig = client.guildConfigs.get(newMessage.guild.id);
   const staffLogId = currentGuildConfig.channels["staffLogId"];
   const staffLogChannel = newMessage.guild.channels.cache.get(staffLogId);
-
-  try {
-    if (newMessage.author.bot || oldMessage.author.bot) return;
-  } catch (error) {
-    console.log(
-      `Message Edit Listener Error: Checking if message editor is a bot returned an error, \n ${error}`
-    );
-  }
 
   const user = oldMessage.guild.members.cache.find(
     (u) => u.user === newMessage.author

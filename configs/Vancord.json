@@ -18,7 +18,8 @@
     "reply",
     "unmute",
     "userlog",
-    "warn"
+    "warn",
+    "snap"
   ],
   "channels": {
     "staffLogId": "786825421576208414"
