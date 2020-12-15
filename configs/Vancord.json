@@ -19,7 +19,8 @@
     "unmute",
     "userlog",
     "warn",
-    "snap"
+    "snap",
+    "say"
   ],
   "channels": {
     "staffLogId": "786825421576208414"
