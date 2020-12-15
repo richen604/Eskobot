@@ -5,6 +5,7 @@ module.exports = {
   usage: "<channel> <message> || <channel.id> <message>",
   cooldown: "5",
   guildOnly: "true",
+  staffRoles: ["Exec. Director", "Board Member", "Staff", "Comfy", ".", "+"],
   execute(client, message, args) {
     const channel =
       message.guild.channels.cache.get(args[0]) ||
