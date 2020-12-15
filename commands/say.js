@@ -11,7 +11,6 @@ module.exports = {
       message.guild.channels.cache.get(
         args[0].replace("<#", "").replace(">", "")
       );
-    console.log("channel is", channel);
     if (!channel)
       return message.reply("Please include a valid channel or channel id");
 
