@@ -1,5 +1,5 @@
 module.exports = {
-  name: "bork",
+  name: "say",
   description:
     "takes given message and says it through the bot in a given channel",
   usage: "<channel> <message> || <channel.id> <message>",
@@ -15,5 +15,6 @@ module.exports = {
     channel.send(sayMessage).catch((err) => {
       console.log("Error with sending message to channel in say command", err);
     });
+    return;
   },
 };

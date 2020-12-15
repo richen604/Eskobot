@@ -176,13 +176,11 @@ client.on("message", async (message) => {
   //START COMMAND HANDLING LOGIC
 
   if (command.staffRoles) {
-    if (
-      !message.member.roles.cache.some((r) =>
-        command.staffRoles.includes(r.name)
-      )
-    ) {
+    const staffRolesCheck = message.member.roles.cache.some((r) =>
+      command.staffRoles.includes(r.name)
+    );
+    if (!staffRolesCheck)
       return message.reply("Sorry, you don't have permissions to use this!");
-    }
   }
   // Arguments and staff check => args-info.js
   if (command.args && !args.length) {
