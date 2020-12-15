@@ -1,6 +1,6 @@
 {
-  "guild": "",
-  "ticketParentId": "",
+  "guild": "731220209511432334",
+  "ticketParentId": "747457097762865203",
   "features": {
     "Modmail": true,
     "PunishLog": true,
@@ -18,11 +18,11 @@
     "reply",
     "unmute",
     "userlog",
-    "warn"
+    "warn",
+    "snap",
+    "say"
   ],
   "channels": {
-    "ticketParentId": "string",
-    "staffLogId": "string",
-    "generalId": "string"
+    "staffLogId": "743831588328046623",
   }
 }
