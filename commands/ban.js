@@ -4,6 +4,7 @@ module.exports = {
   guildOnly: "true",
   staffRoles: ["Exec. Director", "Board Member", "Staff", ".", "+"],
   log: "true",
+  args: "true",
   execute(client, message, args, punishmentLog) {
     const user =
       message.mentions.members.first() || client.users.resolve(args[0]);
@@ -20,7 +21,7 @@ module.exports = {
     let reason = args.slice(1).join(" ");
     if (!reason) reason = "No reason provided";
 
-    member.ban(reason).catch((err) => {
+    member.ban({ days: 7, reason: `${reason}` }).catch((err) => {
       console.log(err);
       message.reply(
         `Sorry ${message.author} I couldn't ban because of : ${err}`

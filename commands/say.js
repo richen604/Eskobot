@@ -3,6 +3,7 @@ module.exports = {
   description:
     "takes given message and says it through the bot in a given channel",
   usage: "<channel> <message> || <channel.id> <message>",
+  args: "true",
   cooldown: "5",
   guildOnly: "true",
   staffRoles: ["Exec. Director", "Board Member", "Staff", "Comfy", ".", "+"],

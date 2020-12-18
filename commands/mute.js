@@ -21,19 +21,19 @@ module.exports = {
         if (!reason) reason = 'No reason provided';
 
         const time = args[1];
-
+        
         if (!args[1]) {
             member.roles.add(muterole.id);
-            return message.channel.send(`${member} has now been muted for ${reason}`);
-        } else if (typeof args[1] === 'string') {
+            return message.channel.send(`${member} has now been muted for ${reason} indefinitly`);
+        } else if (args[1] && args[2]) {
             //BUG reason becomes <time> if thats the only argument as time is a string apparently
-            let reason = args.slice(1).join(' ');
+            let reason = args.slice(2).join(' '); 
             member.roles.add(muterole.id);
-            return message.channel.send(`${member} has now been muted for ${reason}`);
+            message.channel.send(`${member} has now been muted for ${ms(ms(time))} for ${reason}`);
+        } else if (args[1] && !args[2]) {
+            member.roles.add(muterole.id);
+            message.channel.send(`${member} has now been muted for ${ms(ms(time))} for ${reason}`);
         }
-
-        member.roles.add(muterole.id);
-        message.channel.send(`${member} has now been muted for ${ms(ms(time))} for ${reason}`);
 
         setTimeout(function() {
             member.roles.remove(muterole.id);

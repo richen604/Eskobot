@@ -17,11 +17,7 @@ module.exports = {
     if (!args.length) {
       data.push("Here's a list of all my commands:");
       data.push(
-        commands
-          .filter((command) =>
-            currentGuildConfig.commands.includes(command.name)
-          )
-          .join(", ")
+        currentGuildConfig.commands.map((command) => command).join(", ")
       );
       data.push(
         `\n You can send \`${prefix}help [command name]\` to get info on a specific command!`

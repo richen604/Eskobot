@@ -22,6 +22,16 @@ const logPunishment = async function (
   let reason = args.slice(1).join(" ");
   if (!reason) reason = "No reason provided";
 
+  //mute command handling
+  if(command.name === "mute"){
+    if (args[1] && args[2]) {
+        reason = args.slice(2).join(' '); 
+    } else if (args[1] && !args[2]) {
+        reason = "No reason provided";
+    }
+  }
+  
+
   const channel = client.channels.cache.get(
     currentGuildConfig.channels["staffLogId"]
   );

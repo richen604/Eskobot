@@ -15,17 +15,6 @@ const staffLog = require("./functions/staffLogs");
 
 const antiSpam = antiSpamFunc.antispamInit();
 
-// MASTER TODO LIST
-//TODO Refactor to allow for multiple servers
-
-//TODO Refactor Modmail to allow for multiple servers
-//TODO Refactor Role Message React feature to allow for multiple servers
-//TODO Refactor to migrate from needing a config.json. or to be able to edit config.json within server (preferred)
-
-//TODO init command function
-
-//TODO set up an init command to set up server functions like staff log and modmail ticket channels
-
 const client = new Discord.Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION"],
 });
@@ -155,23 +144,10 @@ client.on("message", async (message) => {
       punishmentLog
     );
     return;
-  } else if (!command) {
-    // INIT REACT FOR CONTENT VOTING
-    /*if (message.channel.id === contentVoteChannel){
-            await message.react('👍')
-        } else {
-            return;
-        }*/
-  } else if (
-    message.content.startsWith(prefix) &&
-    command.guildOnly &&
-    message.channel.type !== "text"
-  ) {
-    return;
   }
 
   //Returning if theres no command or message isn't prefix
-  if (!command && !message.content.startsWith(prefix)) return;
+  if (!command || !message.content.startsWith(prefix)) return;
 
   //START COMMAND HANDLING LOGIC
 
