@@ -5,10 +5,11 @@ module.exports = {
     staffRoles: ['Exec. Director', 'Board Member', 'Staff', '.', '+'],
     log: 'true',
     args: 'true',
-    execute(client, message, args) {
+    async execute(client, message, args) {
         const user =
             message.mentions.members.first() ||
-            message.guild.members.cache.get(args[0]);
+            message.guild.members.cache.get(args[0]) ||
+            (await message.guild.members.fetch(args[0]));
         if (!user) {
             return message.reply(
                 'Please mention a valid member of this server',
