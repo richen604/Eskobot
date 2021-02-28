@@ -21,7 +21,7 @@ const commandConfigCheck = async function(client, message, guild, command) {
   const currentGuildConfig = await client.guildConfigs.get(guild.id);
 
   if (!currentGuildConfig) {
-    message.reply(`${guild.name} has not set up ${feature} yet`);
+    message.reply(`${guild.name} is not set up yet`);
     return false;
   }
 

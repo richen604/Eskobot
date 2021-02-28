@@ -17,6 +17,7 @@ module.exports = {
   ],
   execute(client, message, args, punishmentLog) {
     try {
+      // eslint-disable-next-line no-inner-declarations
       async function f() {
         // arg will be name or id of user
         const member =
@@ -36,7 +37,7 @@ module.exports = {
         if (tagList.length > 0) {
           tagList.forEach((t) => {
             exampleEmbed.addFields({
-              name: `id\: ${t.id} \| ${t.punishment} for ${t.reason}`,
+              name: `Punishment: ${t.id} | ${t.punishment} for ${t.reason}`,
               value: `Done by Staff: ${t.staffName}`,
             });
           });

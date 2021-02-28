@@ -5,7 +5,7 @@ module.exports = {
     staffRoles: ['Exec. Director', 'Board Member', 'Staff', 'Comfy', '.'],
     log: 'true',
     args: 'true',
-    execute(client, message, args, punishmentLog) {
+    execute(client, message, args) {
         const user = message.mentions.members.first() || client.users.resolve(args[0]);
         if (!user) { return message.reply('Please mention a valid member of this server'); }
         const member = message.guild.members.cache.find(m => m.id === user.id);

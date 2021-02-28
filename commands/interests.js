@@ -1,5 +1,6 @@
+require('dotenv').config();
 const Discord = require('discord.js');
-const { rolesChannel } = require('../config.json');
+const { rolesChannel } = process.env;
 
 module.exports = {
   name: 'interests',
@@ -24,6 +25,8 @@ module.exports = {
     };
 
     if (message.channel.id !== rolesChannel) return;
+    
+    // eslint-disable-next-line no-unused-vars, no-empty-function
     message.delete().catch((O_o) => {});
     const interestsEmbed = new Discord.MessageEmbed().setDescription(
       '---------------------**React to this message for an Interests Role!**--------------------- \nMultiple Roles available, show people what you want to learn!',

@@ -5,8 +5,9 @@ module.exports = {
     description: 'takes an array of categories, embeds it to the lfgVote channel',
     guildOnly: 'true',
     staffRoles: ['Exec. Director', '.'],
-    execute(client, message, args, punishmentLog) {
+    execute(client, message, args) {
         if (message.channel.id !== '735951916621627472') return message.reply('This command is limited to the lfgVote channel');
+        // eslint-disable-next-line valid-typeof
         if ((typeof args !== 'array') && (typeof args[0] !== 'undefined')) { return message.reply('Please provide an array of categories');}
         
         const links = ['Art and Design 🧩', 'Business 👔', 'Computer Science 💻', 'Data Science 🖥️', 'Engineering 🦺', 'Education & Teaching 📌',
@@ -23,6 +24,7 @@ module.exports = {
                     name: '_ _', value: `${item}`, inline: false,
                 });
                  
+                // eslint-disable-next-line no-inner-declarations
                 async function f() {
                     await message.channel.send(lfgVoteEmbed).then(embed => {embed.react('👍');});
                 }f();

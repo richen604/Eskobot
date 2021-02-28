@@ -1,6 +1,8 @@
+require('dotenv').config();
 const { featureConfigCheck } = require('./checks.js');
 const Discord = require('discord.js');
-const { prefix } = require('../config.json');
+const { prefix } = process.env;
+const ms = require('ms');
 
 const MessageDeleteHandler = async function(client, message) {
   const staffLogCheck = await featureConfigCheck(

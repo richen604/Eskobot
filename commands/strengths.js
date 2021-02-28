@@ -1,5 +1,6 @@
+require('dotenv').config();
 const Discord = require('discord.js');
-const { rolesChannel } = require('../config.json');
+const { rolesChannel } = process.env;
 
 module.exports = {
   name: 'strengths',
