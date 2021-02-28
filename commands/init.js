@@ -1,5 +1,4 @@
-const { disconnect } = require("pm2");
-
+/* eslint-disable no-unused-vars */
 /*
 REQUIREMENT REFACTORING BEFORE INIT COMMAND WILL WORK
 - function for staff roles in modules
@@ -56,40 +55,40 @@ UNSORTED NOTES:
     - 
 
 */
-const Discord = require("discord.js");
+const Discord = require('discord.js');
 
 module.exports = {
-  name: "init",
-  description: "starts prompt to create bot features",
-  cooldown: "600",
-  guildOnly: "true",
+  name: 'init',
+  description: 'starts prompt to create bot features',
+  cooldown: '600',
+  guildOnly: 'true',
   execute(client, message) {
     //reaction array for use throughout the function
     const numberReactions = [
-      "1⃣",
-      "2⃣",
-      "3⃣",
-      "4⃣",
-      "5⃣",
-      "6⃣",
-      "7⃣",
-      "8⃣",
-      "9⃣",
-      "🔟",
+      '1⃣',
+      '2⃣',
+      '3⃣',
+      '4⃣',
+      '5⃣',
+      '6⃣',
+      '7⃣',
+      '8⃣',
+      '9⃣',
+      '🔟',
     ];
-    const exitReaction = "🗑️";
-    const yesReaction = "✅";
-    const noReaction = "⭕";
+    const exitReaction = '🗑️';
+    const yesReaction = '✅';
+    const noReaction = '⭕';
     //Create an Embed to be used for prompt
     const GuildPromptEmbed = new Discord.MessageEmbed()
       //TODO Change color and create .setThumbnail for bot pfp
-      .setColor("#6A0DAD")
+      .setColor('#6A0DAD')
       .setTitle(`Welcome to Eskobot ${message.username}`)
       .setDescription(
-        "Before you begin, please select the server you are directing your message to."
+        'Before you begin, please select the server you are directing your message to.',
       )
       //.setThumbnail(member.avatarURL())
-      .setFooter("Note: Misuse of Modmail may lead to punishment.")
+      .setFooter('Note: Misuse of Modmail may lead to punishment.')
       .setTimestamp();
   },
 };

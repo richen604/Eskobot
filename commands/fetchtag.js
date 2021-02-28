@@ -4,8 +4,8 @@ module.exports = {
     guildOnly: 'true',
     args: 'true',
     usage: '*Testing* | <username> |',
-    staffRoles: ['Exec. Director', '+', "."],
-    execute (client, message, args, punishmentLog) {
+    staffRoles: ['Exec. Director', '+', '.'],
+    execute(client, message, args, punishmentLog) {
         async function f() {
             const tagName = args[0];
 
@@ -18,6 +18,6 @@ module.exports = {
             }
             return message.reply(`Could not find tag: ${tagName}`);
         }
-        f()
-    }
-}
+        f();
+    },
+};
