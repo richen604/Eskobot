@@ -9,54 +9,54 @@ const {
   rulesMessageID,
   lfgHubParentID,
   contentHubParentID,
-} = require("../config.json");
+} = process.env;
 
 const strengthsObj = {
-  "🧩": "Art and Design 🧩",
-  "👔": "Business 👔",
-  "💻": "Computer Science 💻",
-  "🖥️": "Data Science 🖥️",
-  "🦺": "Engineering 🦺",
-  "📌": "Education and Teaching 📌",
-  "💉": "Health and Medicine 💉",
-  "🔎": "Humanities 🔎",
-  "⌨️": "Programming ⌨️",
-  "🗿": "Personal Development 🗿",
-  "📐": "Mathematics 📐",
-  "🔬": "Sciences 🔬",
-  "💡": "Social Sciences 💡",
+  '🧩': 'Art and Design 🧩',
+  '👔': 'Business 👔',
+  '💻': 'Computer Science 💻',
+  '🖥️': 'Data Science 🖥️',
+  '🦺': 'Engineering 🦺',
+  '📌': 'Education and Teaching 📌',
+  '💉': 'Health and Medicine 💉',
+  '🔎': 'Humanities 🔎',
+  '⌨️': 'Programming ⌨️',
+  '🗿': 'Personal Development 🗿',
+  '📐': 'Mathematics 📐',
+  '🔬': 'Sciences 🔬',
+  '💡': 'Social Sciences 💡',
 };
 
 const interestsObj = {
-  "🧩": "Art and Design",
-  "👔": "Business",
-  "💻": "Computer Science",
-  "🖥️": "Data Science",
-  "🦺": "Engineering",
-  "📌": "Education and Teaching",
-  "💉": "Health and Medicine",
-  "🔎": "Humanities",
-  "⌨️": "Programming",
-  "🗿": "Personal Development",
-  "📐": "Mathematics",
-  "🔬": "Sciences",
-  "💡": "Social Sciences",
+  '🧩': 'Art and Design',
+  '👔': 'Business',
+  '💻': 'Computer Science',
+  '🖥️': 'Data Science',
+  '🦺': 'Engineering',
+  '📌': 'Education and Teaching',
+  '💉': 'Health and Medicine',
+  '🔎': 'Humanities',
+  '⌨️': 'Programming',
+  '🗿': 'Personal Development',
+  '📐': 'Mathematics',
+  '🔬': 'Sciences',
+  '💡': 'Social Sciences',
 };
 
-const ReactionAddHandler = async function (client, reaction, user) {
+const ReactionAddHandler = async function(client, reaction, user) {
   const member = reaction.message.guild.members.cache.find(
-    (u) => u.user === user
+    (u) => u.user === user,
   );
 
   //ignore reaction listener if it is from a bot
   if (member.bot) return;
 
   // RULES FUNCTION
-  if (reaction.message.id === rulesMessageID && reaction.emoji.name === "📚");
+  if (reaction.message.id === rulesMessageID && reaction.emoji.name === '📚');
   {
     // Find role Pupil and add it to the user
     const role = reaction.message.guild.roles.cache.find(
-      (roleFind) => roleFind.name === "Pupil"
+      (roleFind) => roleFind.name === 'Pupil',
     );
     member.roles.add(role);
   }
@@ -66,7 +66,7 @@ const ReactionAddHandler = async function (client, reaction, user) {
   if (reaction.message.id === strengthsMessageID) {
     //collection of reactions that user is in
     const userReactions = reaction.message.reactions.cache.filter(
-      (reactionFilter) => reactionFilter.users.cache.has(member.id)
+      (reactionFilter) => reactionFilter.users.cache.has(member.id),
     );
     const userReactionsArr = userReactions.keyArray();
     const firstReact = userReactions.last();
@@ -85,18 +85,20 @@ const ReactionAddHandler = async function (client, reaction, user) {
 
     if (firstReact == undefined) {
       console.log(
-        `Member id ${member.id} tried to select a Strength, may open ticket`
+        `Member id ${member.id} tried to select a Strength, may open ticket`,
       );
       return;
       //Adds Strengths Role if first
-    } else if (firstReact && firstReact.emoji.name === reaction.emoji.name) {
+    }
+ else if (firstReact && firstReact.emoji.name === reaction.emoji.name) {
       const strengthsRole = reaction.message.guild.roles.cache.find(
-        (r) => r.name === strengthsObj[firstReact.emoji.name]
+        (r) => r.name === strengthsObj[firstReact.emoji.name],
       );
       await member.roles.add(strengthsRole);
       return;
       //Removes react if already selected a role
-    } else if (firstReact && userReactionsArr.length > 1) {
+    }
+ else if (firstReact && userReactionsArr.length > 1) {
       for (const reactionFind of userReactions.values()) {
         if (reactionFind.emoji.name === firstReact.emoji.name) return;
         await reaction.users.remove(member.id);
@@ -110,7 +112,7 @@ const ReactionAddHandler = async function (client, reaction, user) {
   if (reaction.message.id === interestsMessageID) {
     //TODO if user has a strengthRole and applies an interestRole returns (vise versa)
     const interestsRole = reaction.message.guild.roles.cache.find(
-      (r) => r.name === interestsObj[reaction.emoji.name]
+      (r) => r.name === interestsObj[reaction.emoji.name],
     );
     await member.roles.add(interestsRole);
     return;
@@ -122,7 +124,7 @@ const ReactionAddHandler = async function (client, reaction, user) {
   if (reaction.message.channel.id === lfgVoteChannel) {
     //Changes lfgCount relative to how many channels exist
     const getLfgHub = client.channels.cache.filter(
-      (c) => c.parentID === lfgHubParentID
+      (c) => c.parentID === lfgHubParentID,
     );
     const arr = getLfgHub.keyArray();
     console.log(`arr length is ${arr.length}`);
@@ -133,7 +135,7 @@ const ReactionAddHandler = async function (client, reaction, user) {
     console.log(`lfg count is ${lfgCount}`);
     //finds only the channels that are over lfg count
     const reactionCount = reaction.message.reactions.cache.find(
-      (reactionFind) => reactionFind.count >= lfgCount
+      (reactionFind) => reactionFind.count >= lfgCount,
     );
     if (!reactionCount) return; // ignores reacts that aren't greater or equal to the first lfgCount
     await reaction.message.channel.messages.fetch(); //fetches the messages from cache
@@ -141,48 +143,49 @@ const ReactionAddHandler = async function (client, reaction, user) {
     // this gets the description for channel finding/making usage
     const category = reaction.message.embeds[0];
     const categoryName = category.fields[0].value
-      .replace(/\s+/g, "-")
+      .replace(/\s+/g, '-')
       .toLowerCase();
 
     const findCategoryContent = client.channels.cache.find(
-      (c) => c.name === categoryName
+      (c) => c.name === categoryName,
     );
     const findCategoryLfg = client.channels.cache.find(
-      (c) => c.name === categoryName
+      (c) => c.name === categoryName,
     );
 
     //check if message.content / channel.name exist in both contentHub or lfgHub
     if (findCategoryContent && findCategoryLfg) {
       return console.log(
-        `LfgVote: Channel ${category.fields[0].value} already exists`
+        `LfgVote: Channel ${category.fields[0].value} already exists`,
       );
-    } else {
+    }
+ else {
       const guild = client.guilds.cache.get(KallantGuildID);
       //creates channel in both Lfg-hub and Content-hub
       //LFG-Hub
       const lfgChannelCreate = await guild.channels.create(
         category.fields[0].value,
         {
-          type: "text",
+          type: 'text',
           parent: lfgHubParentID, // id of lfg-hub channel category
-        }
+        },
       );
       lfgChannelCreate().catch((err) =>
-        console.log("There was an error with making channel for LfgVote", err)
+        console.log('There was an error with making channel for LfgVote', err),
       );
       //Content-Hub
       const contentChannelCreate = await guild.channels.create(
         category.fields[0].value,
         {
-          type: "text",
+          type: 'text',
           parent: contentHubParentID, // id of lfg-hub channel category
-        }
+        },
       );
       contentChannelCreate().catch((err) =>
         console.log(
-          "There was an error with making channel for ContentVote",
-          err
-        )
+          'There was an error with making channel for ContentVote',
+          err,
+        ),
       );
     }
   }
@@ -198,7 +201,7 @@ const ReactionAddHandler = async function (client, reaction, user) {
     }*/
 };
 
-const ReactionRemoveHandler = async function (client, reaction, user) {
+const ReactionRemoveHandler = async function(client, reaction, user) {
   // only listen for reactions in channels we want to handle reactions
   if (
     !reaction.message.channel.id ===
@@ -211,17 +214,18 @@ const ReactionRemoveHandler = async function (client, reaction, user) {
     // try catch for fetching
     try {
       await reaction.fetch();
-    } catch (error) {
-      console.log("Something went wrong when fetching the message: ", error);
+    }
+ catch (error) {
+      console.log('Something went wrong when fetching the message: ', error);
       return;
     }
   }
 
   const guildId = reaction.message.guild.id;
   // ignore other servers until i set them up
-  if (guildId !== "731220209511432334") return;
+  if (guildId !== '731220209511432334') return;
   const member = reaction.message.guild.members.cache.find(
-    (u) => u.user === user
+    (u) => u.user === user,
   );
 
   // Roles Removal Function
@@ -229,7 +233,7 @@ const ReactionRemoveHandler = async function (client, reaction, user) {
   //Strengths Role
   if (reaction.message.id === strengthsMessageID) {
     const strengthsRole = reaction.message.guild.roles.cache.find(
-      (r) => r.name === strengthsObj[reaction.emoji.name]
+      (r) => r.name === strengthsObj[reaction.emoji.name],
     );
     await member.roles.remove(strengthsRole);
   }
@@ -237,7 +241,7 @@ const ReactionRemoveHandler = async function (client, reaction, user) {
   if (reaction.message.id === interestsMessageID) {
     //TODO if user has a strengthRole and applies an interestRole returns (vise versa)
     const interestsRole = reaction.message.guild.roles.cache.find(
-      (r) => r.name === interestsObj[reaction.emoji.name]
+      (r) => r.name === interestsObj[reaction.emoji.name],
     );
     await member.roles.remove(interestsRole);
     return;

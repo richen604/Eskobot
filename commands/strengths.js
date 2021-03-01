@@ -1,36 +1,37 @@
-const Discord = require("discord.js");
-const { rolesChannel } = require("../config.json");
+require('dotenv').config();
+const Discord = require('discord.js');
+const { rolesChannel } = process.env;
 
 module.exports = {
-  name: "strengths",
-  description: "posts an embed for strengths roles, Admin Only",
-  staffRoles: ["Exec. Director"],
-  guildOnly: "true",
+  name: 'strengths',
+  description: 'posts an embed for strengths roles, Admin Only',
+  staffRoles: ['Exec. Director'],
+  guildOnly: 'true',
   execute(client, message) {
     const strengthsObj = {
-      "🧩": "Art and Design 🧩",
-      "👔": "Business 👔",
-      "💻": "Computer Science 💻",
-      "🖥️": "Data Science 🖥️",
-      "🦺": "Engineering 🦺",
-      "📌": "Education and Teaching 📌",
-      "💉": "Health and Medicine 💉",
-      "🔎": "Humanities 🔎",
-      "⌨️": "Programming ⌨️",
-      "🗿": "Personal Development 🗿",
-      "📐": "Mathematics 📐",
-      "🔬": "Sciences 🔬",
-      "💡": "Social Sciences 💡",
+      '🧩': 'Art and Design 🧩',
+      '👔': 'Business 👔',
+      '💻': 'Computer Science 💻',
+      '🖥️': 'Data Science 🖥️',
+      '🦺': 'Engineering 🦺',
+      '📌': 'Education and Teaching 📌',
+      '💉': 'Health and Medicine 💉',
+      '🔎': 'Humanities 🔎',
+      '⌨️': 'Programming ⌨️',
+      '🗿': 'Personal Development 🗿',
+      '📐': 'Mathematics 📐',
+      '🔬': 'Sciences 🔬',
+      '💡': 'Social Sciences 💡',
     };
 
     if (message.channel.id !== rolesChannel) return;
     message.delete().catch((err) => console.log(err));
     const strengthsEmbed = new Discord.MessageEmbed().setDescription(
-      "---------------------**React to this message for a Strengths Role!**--------------------- \nLimited to 1 role, if the correct role isn't showing remove all reactions and select again."
+      '---------------------**React to this message for a Strengths Role!**--------------------- \nLimited to 1 role, if the correct role isn\'t showing remove all reactions and select again.',
     );
     for (const key in strengthsObj) {
       strengthsEmbed.addFields({
-        name: "_ _",
+        name: '_ _',
         value: `${strengthsObj[key]}`,
         inline: true,
       });

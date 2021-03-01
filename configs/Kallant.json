@@ -1,28 +1,28 @@
 {
-  "guild": "731220209511432334",
-  "ticketParentId": "747457097762865203",
-  "features": {
-    "Modmail": true,
-    "PunishLog": true,
-    "StaffLog": true
-  },
-  "commands": [
-    "ban",
-    "bork",
-    "close",
-    "help",
-    "kick",
-    "mute",
-    "ping",
-    "purge",
-    "reply",
-    "unmute",
-    "userlog",
-    "warn",
-    "snap",
-    "say"
-  ],
-  "channels": {
-    "staffLogId": "743831588328046623"
-  }
+    "guild": "731220209511432334",
+    "ticketParentId": "747457097762865203",
+    "features": {
+        "Modmail": true,
+        "PunishLog": true,
+        "StaffLog": true
+    },
+    "commands": [
+        "ban",
+        "bork",
+        "close",
+        "help",
+        "kick",
+        "mute",
+        "ping",
+        "purge",
+        "reply",
+        "unmute",
+        "userlog",
+        "warn",
+        "snap",
+        "say"
+    ],
+    "channels": {
+        "staffLogId": "743831588328046623"
+    }
 }

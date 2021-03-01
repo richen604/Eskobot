@@ -18,11 +18,11 @@
     "reply",
     "unmute",
     "userlog",
-    "warn"
+    "warn",
+    "snap",
+    "say"
   ],
   "channels": {
-    "ticketParentId": "string",
-    "staffLogId": "781964639117901848",
-    "generalId": "string"
+    "staffLogId": "795680678490275900"
   }
 }

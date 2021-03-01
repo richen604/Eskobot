@@ -1,8 +1,8 @@
 module.exports = {
-    name: "showtags",
-    description: "shows all tags in database",
-    guildOnly: "true",
-    staffRoles: ['Exec. Director', '+', "."],
+    name: 'showtags',
+    description: 'shows all tags in database',
+    guildOnly: 'true',
+    staffRoles: ['Exec. Director', '+', '.'],
     execute(client, message, args, punishmentLog) {
             // equivalent to: SELECT name FROM tags;
         async function f() {
@@ -18,6 +18,6 @@ module.exports = {
 
             return message.channel.send(`List of tags: ${tagString}`);
     }   
-    f()
+    f();
 
-}}
+} };

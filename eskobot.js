@@ -1,22 +1,23 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-unused-vars */
 /* eslint-disable brace-style */
-const fs = require("fs");
-const ms = require("ms");
-const Discord = require("discord.js");
-const { prefix, token, KallantGuildID } = require("./config.json");
-const modmail = require("./functions/modmail");
-const Kallant = require("./functions/Kallant");
-const punishmentLogger = require("./functions/punishmentLog");
-const checks = require("./functions/checks");
-const antiSpamFunc = require("./functions/antispam");
-const guildLogs = require("./functions/guildLogs");
-const staffLog = require("./functions/staffLogs");
+require('dotenv').config();
+const fs = require('fs');
+const ms = require('ms');
+const Discord = require('discord.js');
+const { prefix, token, KallantGuildID } = process.env;
+const modmail = require('./functions/modmail');
+const Kallant = require('./functions/Kallant');
+const punishmentLogger = require('./functions/punishmentLog');
+const checks = require('./functions/checks');
+const antiSpamFunc = require('./functions/antispam');
+const guildLogs = require('./functions/guildLogs');
+const staffLog = require('./functions/staffLogs');
 
 const antiSpam = antiSpamFunc.antispamInit();
 
 const client = new Discord.Client({
-  partials: ["MESSAGE", "CHANNEL", "REACTION"],
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
 });
 
 // sequelize initialization for punishmentLog and ticketLog
@@ -30,11 +31,11 @@ client.guildConfigs = new Discord.Collection();
 const cooldowns = new Discord.Collection();
 
 const commandFiles = fs
-  .readdirSync("./commands")
-  .filter((file) => file.endsWith(".js"));
+  .readdirSync('./commands')
+  .filter((file) => file.endsWith('.js'));
 const guildFiles = fs
-  .readdirSync("./configs")
-  .filter((file) => file.endsWith(".json"));
+  .readdirSync('./configs')
+  .filter((file) => file.endsWith('.json'));
 
 for (const file of commandFiles) {
   const command = require(`./commands/${file}`);
@@ -51,29 +52,29 @@ punishmentLog.sync();
 ticketLog.sync();
 
 // Bot start
-client.on("ready", async () => {
+client.on('ready', async () => {
   console.log(
-    `Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`
+    `Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`,
   );
-  client.user.setActivity("Message me for help!");
+  client.user.setActivity('Message me for help!');
   //TODO find a way to do a quick react/unreact feature to debug listeners
 });
 
-client.on("guildCreate", (guild) => {
+client.on('guildCreate', (guild) => {
   console.log(
-    `New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`
+    `New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`,
   );
-  client.user.setActivity("Message me for help!");
+  client.user.setActivity('Message me for help!');
 });
 
-client.on("guildDelete", (guild) => {
+client.on('guildDelete', (guild) => {
   console.log(`I have been removed from: ${guild.name} (id: ${guild.id})`);
-  client.user.setActivity("Message me for help!");
+  client.user.setActivity('Message me for help!');
 });
 
 // CLIENT ON MESSAGE
 
-client.on("message", async (message) => {
+client.on('message', async (message) => {
   // ignore bots/self
   if (message.author.bot) return;
 
@@ -98,12 +99,12 @@ client.on("message", async (message) => {
   const command =
     client.commands.get(commandName) ||
     client.commands.find(
-      (cmd) => cmd.aliases && cmd.aliases.includes(commandName)
+      (cmd) => cmd.aliases && cmd.aliases.includes(commandName),
     );
 
   // If message is not in guild
   //MODMAIL FUNCTION
-  if (!command && message.channel.type !== "text") {
+  if (!command && message.channel.type !== 'text') {
     //builds an array of guilds the user is a member in
     let memberGuildsArr = [];
     botGuildsId.forEach((guildId) => {
@@ -119,7 +120,7 @@ client.on("message", async (message) => {
       guild = await modmail.ModmailGuildPrompt(
         message,
         messageUser,
-        memberGuildsArr
+        memberGuildsArr,
       );
       if (!guild) return;
     }
@@ -129,7 +130,7 @@ client.on("message", async (message) => {
     }
 
     //check for modmail off in guildConfig
-    if (!checks.featureConfigCheck(client, message, guild, "Modmail")) return;
+    if (!checks.featureConfigCheck(client, message, guild, 'Modmail')) return;
 
     //we don't need memberGuildArr anymore
     memberGuildsArr = undefined;
@@ -141,7 +142,7 @@ client.on("message", async (message) => {
       message,
       guild,
       messageUser,
-      punishmentLog
+      punishmentLog,
     );
     return;
   }
@@ -153,10 +154,10 @@ client.on("message", async (message) => {
 
   if (command.staffRoles) {
     const staffRolesCheck = message.member.roles.cache.some((r) =>
-      command.staffRoles.includes(r.name)
+      command.staffRoles.includes(r.name),
     );
     if (!staffRolesCheck)
-      return message.reply("Sorry, you don't have permissions to use this!");
+      {return message.reply('Sorry, you don\'t have permissions to use this!');}
   }
   // Arguments and staff check => args-info.js
   if (command.args && !args.length) {
@@ -183,8 +184,8 @@ client.on("message", async (message) => {
       const timeLeft = (expirationTime - now) / 1000;
       return message.reply(
         `please wait ${timeLeft.toFixed(
-          1
-        )} more second(s) before reusing the \`${command.name}\` command.`
+          1,
+        )} more second(s) before reusing the \`${command.name}\` command.`,
       );
     }
   }
@@ -194,7 +195,7 @@ client.on("message", async (message) => {
 
   //check if command is allowed in guildConfig
   if (!checks.commandConfigCheck(client, message, message.guild, command))
-    return;
+    {return;}
   try {
     command.execute(client, message, args, punishmentLog);
   } catch (error) {
@@ -209,46 +210,46 @@ client.on("message", async (message) => {
         client,
         message,
         message.guild,
-        "PunishLog"
+        'PunishLog',
       ))
     )
-      return;
+      {return;}
     try {
       punishmentLogger.logPunishment(
         client,
         message,
         args,
         punishmentLog,
-        command
+        command,
       );
     } catch (error) {
-      if (error.name === "SequelizeUniqueConstraintError") {
-        return message.reply("That log already exists.");
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        return message.reply('That log already exists.');
       }
       console.log(error);
-      return message.reply("Something went wrong with adding a log.");
+      return message.reply('Something went wrong with adding a log.');
     }
   }
 });
 
 // AntiSpam Error Logging
 
-antiSpam.on("error", (message, error, type) => {
+antiSpam.on('error', (message, error, type) => {
   console.log(
-    `${message.author.tag} couldn't receive the sanction '${type}', error: ${error}`
+    `${message.author.tag} couldn't receive the sanction '${type}', error: ${error}`,
   );
 });
 
 // Client Reaction listener
 
-client.on("messageReactionAdd", async (reaction, user) => {
+client.on('messageReactionAdd', async (reaction, user) => {
   // if partial check
   if (reaction.partial) {
     // try catch for fetching
     try {
       await reaction.fetch();
     } catch (error) {
-      console.log("Something went wrong when fetching the message: ", error);
+      console.log('Something went wrong when fetching the message: ', error);
       return;
     }
   }
@@ -260,19 +261,19 @@ client.on("messageReactionAdd", async (reaction, user) => {
   const guildId = reaction.message.guild.id;
   if (guildId !== KallantGuildID) return;
   Kallant.ReactionAddHandler(client, reaction, user).catch((err) => {
-    console.log("There was an error with Kallants ReactionAddHandler");
+    console.log('There was an error with Kallants ReactionAddHandler');
     console.log(err);
   });
 });
 
-client.on("messageReactionRemove", async (reaction, user) => {
+client.on('messageReactionRemove', async (reaction, user) => {
   // if partial check
   if (reaction.partial) {
     // try catch for fetching
     try {
       await reaction.fetch();
     } catch (error) {
-      console.log("Something went wrong when fetching the message: ", error);
+      console.log('Something went wrong when fetching the message: ', error);
       return;
     }
   }
@@ -283,36 +284,36 @@ client.on("messageReactionRemove", async (reaction, user) => {
   const guildId = reaction.message.guild.id;
   if (guildId !== KallantGuildID) return;
   Kallant.ReactionRemoveHandler(client, reaction, user).catch((err) => {
-    console.log("There was an error with Kallants ReactionRemoveHandler");
+    console.log('There was an error with Kallants ReactionRemoveHandler');
     console.log(err);
   });
 });
 
 // Client message delete logger
 
-client.on("messageDelete", async (message) => {
+client.on('messageDelete', async (message) => {
   if (!message.guild) return;
   staffLog.MessageDeleteHandler(client, message).catch((err) => {
-    console.log("There was an error with MessageDeleteHandler", err);
+    console.log('There was an error with MessageDeleteHandler', err);
   });
 });
 
 // Client message edit logger
 
-client.on("messageUpdate", async (oldMessage, newMessage) => {
+client.on('messageUpdate', async (oldMessage, newMessage) => {
   if (!newMessage.guild) return;
   staffLog.MessageUpdateHandler(client, oldMessage, newMessage);
 });
 
-client.on("guildMemberAdd", (member) => {
+client.on('guildMemberAdd', (member) => {
   staffLog.MemberAddHandler(client, member).catch((err) => {
-    console.log("There was an error with staffLog.MemberAddHandler", err);
+    console.log('There was an error with staffLog.MemberAddHandler', err);
   });
 });
 
-client.on("guildMemberRemove", (member) => {
+client.on('guildMemberRemove', (member) => {
   staffLog.MemberRemoveHandler(client, member).catch((err) => {
-    console.log("There was an error with staffLog.MemberRemoveHandler", err);
+    console.log('There was an error with staffLog.MemberRemoveHandler', err);
   });
 });
 
