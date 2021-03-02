@@ -2,3 +2,5 @@ node_modules
 npm-debug.log
 guildLogs.sqlite
 .env
+env.example
+config.json
